@@ -24,6 +24,13 @@
         <div class="container">
             <header class="main-header">
                 <h1><a class="logo" href="/">ScreenSeat VR</a></h1>
+                <nav class="user-nav">
+                    {% if username %}
+                        <span>Welcome, {{ username }}!</span>
+                    {% else %}
+                        <a href="/login">Login</a> | <a href="/register">Register</a>
+                    {% endif %}
+                </nav>
             </header>
 
             <main class="content">

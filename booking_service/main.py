@@ -1,18 +1,15 @@
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from routes import router
+from database import SessionLocal, engine, Base
+from fastapi.security import OAuth2PasswordBearer
+from typing import Annotated
 
+Base.metadata.create_all(bind=engine)
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+app.include_router(router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.jinja2", {"request": request, "title": "Homepage", "name": "World"})
-
 
 if __name__ == "__main__":
     import uvicorn
