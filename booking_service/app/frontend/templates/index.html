@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to HomeCinemaVR</h1>
+    <p>Your ultimate destination for co-viewing films in virtual reality.</p>
+    <div class="cta-buttons">
+        <a href="/auth/register" class="btn btn-primary">Get Started</a>
+        <a href="/auth/login" class="btn btn-secondary">Login</a>
+    </div>
+</section>
+<section class="features">
+    <h2>Features</h2>
+    <div class="feature-grid">
+        <div class="feature-item">
+            <h3>Watch Together</h3>
+            <p>Experience the thrill of watching your favorite films with friends and family in a virtual cinema.</p>
+        </div>
+        <div class="feature-item">
+            <h3>Vast Film Library</h3>
+            <p>Explore a vast library of films across all genres, ready to be enjoyed in immersive VR.</p>
+        </div>
+        <div class="feature-item">
+            <h3>High Quality Streaming</h3>
+            <p>Enjoy high-quality streaming with low latency, ensuring a smooth and enjoyable viewing experience.</p>
+        </div>
+        <div class="feature-item">
+            <h3>Customizable Cinema</h3>
+            <p>Create and customize your virtual cinema environment to match your personal taste.</p>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2>How It Works</h2>
+    <ol>
+        <li>Register and create your account.</li>
+        <li>Browse our extensive film library.</li>
+        <li>Invite your friends and start watching together in VR.</li>
+    </ol>
+</section>
+{% endblock %}

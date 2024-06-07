@@ -1,10 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Cinema Halls{% endblock %}
+
+{% block content %}
+<h1>Cinema Halls</h1>
+<ul>
+    {% for cinema_hall in cinema_halls %}
+    <li>{{ cinema_hall.name }} - Capacity: {{ cinema_hall.capacity }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

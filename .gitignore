@@ -120,7 +120,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+booking_service/backend/.env
 .venv
 env/
 venv/

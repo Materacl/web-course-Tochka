@@ -1,12 +1,14 @@
 # frontend/routers/auth.py
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request, Form, Response, Depends
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from starlette.status import HTTP_302_FOUND
 import httpx
 
-router = APIRouter()
-templates = Jinja2Templates(directory="app/frontend/templates")
+router = APIRouter(
+    prefix="/auth"
+)
+templates = Jinja2Templates(directory="frontend/templates")
 
 
 @router.get("/register", response_class=HTMLResponse)
@@ -20,7 +22,7 @@ async def post_register(request: Request, email: str = Form(...), password: str 
         response = await client.post("http://127.0.0.1:8000/api/v1/auth/register",
                                      json={"email": email, "password": password})
     if response.status_code == 200:
-        return RedirectResponse(url="/login", status_code=HTTP_302_FOUND)
+        return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("register.html", {"request": request, "error": "Registration failed"})
 
 
@@ -40,3 +42,10 @@ async def post_login(request: Request, email: str = Form(...), password: str = F
         response.set_cookie(key="access_token", value=f"Bearer {token}", httponly=True)
         return response
     return templates.TemplateResponse("login.html", {"request": request, "error": "Login failed"})
+
+
+@router.get("/logout")
+async def logout(request: Request):
+    response = RedirectResponse(url="/")
+    response.delete_cookie("access_token")
+    return response

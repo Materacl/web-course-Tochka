@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/styles.css') }}" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HomeCinemaVR{% endblock %}</title>
+</head>
+<body>
+    <aside class="main-sidebar">
+        <nav class="sidebar-nav">
+            <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+            <ul class="sidebar-nav-list">
+                <li class="sidebar-nav-list-item">
+                    <a href="/">🏠 Home Page</a>
+                </li>
+                <li class="sidebar-nav-list-item">
+                    <a href="/sessions">📈 Sessions</a>
+                </li>
+                {% if request.state.email %}
+                <li class="sidebar-nav-list-item">
+                    <a href="/bookings">🌍 Bookings</a>
+                </li>
+                {% endif %}
+                <li class="sidebar-nav-list-item">
+                    <a href="/films">💼 Films</a>
+                </li>
+                {% if request.state.email %}
+                {% if request.state.is_admin %}
+                <li class="sidebar-nav-list-item">
+                    <a href="/admin">📰 Admin Dashboard</a>
+                </li>
+                {% endif %}
+                {% endif %}
+            </ul>
+        </nav>
+    </aside>
+    <div class="container">
+        <header class="main-header">
+            <h1><a class="logo" href="/">HomeCinemaVR</a></h1>
+                {% if request.state.email %}
+                    <p>Welcome, {{ request.state.email }}</p>
+                    <p><a href="/auth/logout">Logout</a></p>
+                {% else %}
+                    <p>
+                        <a href="/auth/login">Login</a>
+                        <a href="/auth/register">Register</a>
+                    </p>
+                {% endif %}
+        </header>
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+        <footer class="main-footer">
+            <p>&copy; 2024 My Project</p>
+        </footer>
+    </div>
+    <script src="{{ url_for('static', path='/js/scripts.js') }}" rel="stylesheet"></script>
+</body>
+</html>

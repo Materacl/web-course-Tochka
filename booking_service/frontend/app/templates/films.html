@@ -1,9 +1,0 @@
-{% extends "index.html" %}
-{% block content %}
-<h2>Films</h2>
-<ul>
-    {% for film in films %}
-    <li>{{ film.title }}: {{ film.description }}</li>
-    {% endfor %}
-</ul>
-{% endblock %}

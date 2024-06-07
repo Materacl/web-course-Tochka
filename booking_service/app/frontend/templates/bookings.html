@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Bookings{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>My Bookings</h1>
+    {% if request.state.email %}
+        {% if bookings %}
+            <ul class="bookings-list">
+                {% for booking in bookings %}
+                    <li class="booking-list-item">
+                        <div class="booking-header">
+                            <strong>{{ booking.session.film.title }}</strong> <br>
+                        </div>
+                        <div class="booking-details">
+                            <span class="booking-id">Booking ID: {{ booking.id }}</span>
+                            <span class="session-id">Session ID: {{ booking.session_id }}</span>
+                            <span class="film-title">Film Title: {{ booking.session.film.title }}</span>
+                            <span class="booking-status">Status: {{ booking.status }}</span>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No bookings at this moment.</p>
+        {% endif %}
+    {% else %}
+        <p>Login to see your bookings</p>
+        <div class="auth-links">
+            <a href="/auth/login" class="btn btn-primary">Login</a>
+            <a href="/auth/register" class="btn btn-secondary">Register</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
