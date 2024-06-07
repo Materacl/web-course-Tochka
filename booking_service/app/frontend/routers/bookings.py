@@ -23,8 +23,27 @@ async def read_bookings(request: Request):
         for booking in bookings:
             response = await client.get(f"/sessions/{booking.get('session_id')}")
             booking["session"] = response.json()
+            booking["reservations_amount"] = len(booking["reservations"])
 
     return templates.TemplateResponse("bookings.html", {
         "request": request,
         "bookings": bookings,
+    })
+
+
+@router.get("/{booking_id}")
+async def read_bookings(request: Request, booking_id: int):
+    async with httpx.AsyncClient(base_url=settings.API_URL) as client:
+        response = await client.get(f"/bookings/{booking_id}")
+        if response.status_code != 200:
+            booking = None
+        else:
+            booking = response.json()
+            response = await client.get(f"/sessions/{booking.get('session_id')}")
+            booking["session"] = response.json()
+            booking["reservations_amount"] = len(booking["reservations"])
+
+    return templates.TemplateResponse("booking.html", {
+        "request": request,
+        "booking": booking
     })

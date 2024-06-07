@@ -276,6 +276,11 @@ form button:hover {
     padding: 10px;
 }
 
+.bookings-list-item a{
+    text-decoration: none;
+    color: white;
+}
+
 .bookings-header {
     margin-bottom: 10px;
 }
@@ -305,12 +310,12 @@ form button:hover {
     color: white;
 }
 
-.salary {
+.reservations-amount {
     font-weight: bold;
     color: #3498db;
 }
 
-.publication-date {
+.booking-date {
     color: #888;
 }
 

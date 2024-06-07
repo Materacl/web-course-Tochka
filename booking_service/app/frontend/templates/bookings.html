@@ -3,22 +3,22 @@
 {% block title %}Bookings{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>My Bookings</h1>
+<h1>My Bookings</h1>
     {% if request.state.email %}
         {% if bookings %}
             <ul class="bookings-list">
                 {% for booking in bookings %}
-                    <li class="booking-list-item">
-                        <div class="booking-header">
-                            <strong>{{ booking.session.film.title }}</strong> <br>
-                        </div>
-                        <div class="booking-details">
-                            <span class="booking-id">Booking ID: {{ booking.id }}</span>
-                            <span class="session-id">Session ID: {{ booking.session_id }}</span>
-                            <span class="film-title">Film Title: {{ booking.session.film.title }}</span>
-                            <span class="booking-status">Status: {{ booking.status }}</span>
-                        </div>
+                    <li class="bookings-list-item">
+                        <a href="/bookings/{{ booking.id }}">
+                            <div class="booking-header">
+                                <strong>{{ booking.session.film.title }}</strong> <br>
+                                <p class="publication-date"> Session Date: {{ booking.session.datetime }}</p>
+                            </div>
+                            <div class="booking-details">
+                                <p class="reservations-amount"> Amount of Reservations: {{ booking.reservations_amount }}</p>
+                                <span class="booking-status">Status: {{ booking.status }}</span>
+                            </div>
+                        </a>
                     </li>
                 {% endfor %}
             </ul>
@@ -32,5 +32,4 @@
             <a href="/auth/register" class="btn btn-secondary">Register</a>
         </div>
     {% endif %}
-</div>
 {% endblock %}

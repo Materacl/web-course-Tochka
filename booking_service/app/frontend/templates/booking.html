@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Booking{% endblock %}
+
+{% block content %}
+{% if booking %}
+<h1>My Booking</h1>
+<div class="booking-header">
+    <strong>{{ booking.session.film.title }}</strong> <br>
+    <p class="publication-date"> Session Date: {{ booking.session.datetime }}</p>
+</div>
+<div class="booking-details">
+    <span class="booking-status">Status: {{ booking.status }}</span>
+    <p class="reservations-amount"> Amount of Reservations: {{ booking.reservations_amount }}</p>
+    <ul>
+    {% for reservation in booking.reservations %}
+        <li>
+            <p>{{ reservation.id }}</p>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}
