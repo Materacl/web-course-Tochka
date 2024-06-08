@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File
+from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File, Query
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from fastapi.responses import RedirectResponse
@@ -12,16 +12,25 @@ router = APIRouter(
 templates = Jinja2Templates(directory="frontend/templates")
 
 
-@router.get("/")
-async def read_films(request: Request):
+@router.get("/{page}/{limit}")
+async def read_films(request: Request, page: int = 1, limit: int = 12):
+    skip = (page - 1) * limit
+    limit = skip + 12
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
-        response = await client.get("/films/",
-                                    params={"skip": 0, "limit": 10})
+        response = await client.get("/films/", params={"skip": skip, "limit": limit})
         if response.status_code != 200:
             films = []
+            total_films = 0
         else:
             films = response.json()
-    return templates.TemplateResponse("films.html", {"request": request, "films": films})
+            response = await client.get("/films/")
+            total_films = len(response.json())
+
+    return templates.TemplateResponse("films.html", {"request": request,
+                                                     "films": films,
+                                                     "page": page,
+                                                     "limit": limit,
+                                                     "total_films": total_films})
 
 
 @router.get("/{film_id}")
@@ -30,12 +39,10 @@ async def read_film(request: Request, film_id: int):
         response = await client.get(f"/films/{film_id}")
         if response.status_code != 200:
             film = None
-            sessions = None
         else:
             film = response.json()
             if film["status"] == "not_available":
                 film = None
-                sessions = None
             else:
                 film = add_capacity_to_sessions(film)
     return templates.TemplateResponse("film.html", {"request": request, "film": film})
@@ -80,7 +87,25 @@ async def add_film(
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail="Error adding image to film")
 
-    return RedirectResponse(url="/films", status_code=303)
+    return RedirectResponse(url="/films/1/12", status_code=303)
+
+
+@router.post("/{film_id}/update_status", response_class=RedirectResponse)
+async def update_film_status(
+        request: Request,
+        film_id: int,
+        new_status: str = Form(...),
+):
+    if not request["state"]["is_admin"]:
+        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
+
+    token = request.cookies.get("access_token")
+    headers = {"Authorization": token}
+    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
+        response = await client.post(f"/films/{film_id}/{new_status}")
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail="Error changing film status")
+    return RedirectResponse(url="/films/1/12", status_code=303)
 
 
 def add_capacity_to_sessions(film):

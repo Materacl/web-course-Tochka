@@ -12,18 +12,52 @@
                 <a href="{{ url_for('read_film', film_id=film.id) }}">
                     <div class="film-card-header">
                         <h3>{{ film.title }}</h3>
-                        <span class="film-status">{{ film.status }}</span>
+                        {% if request.state.is_admin %}
+                            <form action="{{ url_for('update_film_status', film_id=film.id) }}" method="post" class="film-status-form">
+                                <input type="hidden" name="new_status" value="{{ 'not_available' if film.status == 'available' else 'available' }}">
+                                <button type="submit" class="film-status-button">
+                                    <span class="film-status">
+                                    {% if film.status == 'available' %}
+                                        🎬 Available
+                                    {% else %}
+                                        🚫 Not Available
+                                    {% endif %}
+                                    </span>
+                                </button>
+                            </form>
+                        {% else %}
+                            <span class="film-status">
+                                {% if film.status == 'available' %}
+                                    🎬 Available
+                                {% else %}
+                                    🚫 Not Available
+                                {% endif %}
+                            </span>
+                        {% endif %}
                     </div>
                     <div class="film-card-body">
                         {% if film.image_url %}
-                            <img src="{{ url_for('static', path=film.image_url) }}" alt="{{ film.title }}">
+                            <img src="{{ url_for('static', path=film.image_url) }}" alt="{{ film.title }}" width="300px" height="450px">
+                        {% else %}
+                            <div class="placeholder">🎥 Film Image</div>
                         {% endif %}
-                        <p>{{ film.description }}</p>
+                        <p class="film-description">{{ film.description }}</p>
                     </div>
                 </a>
             </li>
             {% endfor %}
         </ul>
+
+        <!-- Pagination Controls -->
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('read_films', **{'page': page-1, 'limit': limit}) }}">&laquo; Previous</a>
+            {% endif %}
+            <span>Page {{ page }}</span>
+            {% if page * limit < total_films %}
+                <a href="{{ url_for('read_films', **{'page': page+1, 'limit': limit}) }}">Next &raquo;</a>
+            {% endif %}
+        </div>
     {% else %}
         <p>No films available at the moment.</p>
     {% endif %}
