@@ -7,8 +7,12 @@
     <h1>Welcome to HomeCinemaVR</h1>
     <p>Your ultimate destination for co-viewing films in virtual reality.</p>
     <div class="cta-buttons">
-        <a href="/auth/register" class="btn btn-primary">Get Started</a>
-        <a href="/auth/login" class="btn btn-secondary">Login</a>
+        {% if request.state.email %}
+            <a href="/films" class="btn btn-primary">Watch Films</a>
+        {% else %}
+            <a href="/auth/register" class="btn btn-primary">Get Started</a>
+            <a href="/auth/login" class="btn btn-secondary">Login</a>
+        {% endif %}
     </div>
 </section>
 <section class="features">

@@ -3,10 +3,56 @@
 {% block title %}Films{% endblock %}
 
 {% block content %}
-<h1>Films</h1>
-<ul>
-    {% for film in films %}
-    <li>{{ film.title }} - {{ film.description }}</li>
-    {% endfor %}
-</ul>
+<section class="films">
+    <h1>Films</h1>
+    {% if films %}
+        <ul class="films-grid">
+            {% for film in films %}
+            <li class="film-card {% if film.status == 'not_available' %}disabled{% endif %}">
+                <a href="{{ url_for('read_film', film_id=film.id) }}">
+                    <div class="film-card-header">
+                        <h3>{{ film.title }}</h3>
+                        <span class="film-status">{{ film.status }}</span>
+                    </div>
+                    <div class="film-card-body">
+                        {% if film.image_url %}
+                            <img src="{{ url_for('static', path=film.image_url) }}" alt="{{ film.title }}">
+                        {% endif %}
+                        <p>{{ film.description }}</p>
+                    </div>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No films available at the moment.</p>
+    {% endif %}
+</section>
+
+{% if request.state.is_admin %}
+<section class="add-film">
+    <h2>Add New Film</h2>
+    <form action="{{ url_for('add_film') }}" method="post" enctype="multipart/form-data">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea>
+
+        <label for="file">Image:</label>
+        <input type="file" id="file" name="image" required>
+
+        <label for="duration">Duration (in minutes):</label>
+        <input type="number" id="duration" name="duration" required>
+
+        <label for="status">Status:</label>
+        <select id="status" name="status" required>
+            <option value="available">Available</option>
+            <option value="not_available">Not Available</option>
+        </select>
+
+        <button type="submit">Add Film</button>
+    </form>
+</section>
+{% endif %}
 {% endblock %}

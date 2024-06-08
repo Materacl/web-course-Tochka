@@ -32,7 +32,7 @@ async def read_bookings(request: Request):
 
 
 @router.get("/{booking_id}")
-async def read_bookings(request: Request, booking_id: int):
+async def read_booking(request: Request, booking_id: int):
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
         response = await client.get(f"/bookings/{booking_id}")
         if response.status_code != 200:

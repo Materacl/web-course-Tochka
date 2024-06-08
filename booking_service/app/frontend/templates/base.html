@@ -18,20 +18,18 @@
                     <a href="/">🏠 Home Page</a>
                 </li>
                 <li class="sidebar-nav-list-item">
-                    <a href="/sessions">📈 Sessions</a>
+                    <a href="/films">🎬 Films</a>
+                </li>
+                <li class="sidebar-nav-list-item">
+                    <a href="/sessions">📅 All Sessions</a>
                 </li>
                 {% if request.state.email %}
                 <li class="sidebar-nav-list-item">
-                    <a href="/bookings">🌍 Bookings</a>
+                    <a href="/bookings">🎟️ My Bookings</a>
                 </li>
-                {% endif %}
-                <li class="sidebar-nav-list-item">
-                    <a href="/films">💼 Films</a>
-                </li>
-                {% if request.state.email %}
                 {% if request.state.is_admin %}
                 <li class="sidebar-nav-list-item">
-                    <a href="/admin">📰 Admin Dashboard</a>
+                    <a href="/admin">⚙️ Admin Dashboard</a>
                 </li>
                 {% endif %}
                 {% endif %}
@@ -41,8 +39,9 @@
     <div class="container">
         <header class="main-header">
             <h1><a class="logo" href="/">HomeCinemaVR</a></h1>
+            <div class="user-info">
                 {% if request.state.email %}
-                    <p>Welcome, {{ request.state.email }}</p>
+                    <p>Welcome, <a href="/profile">{{ request.state.nickname }}</a> 👤</p>
                     <p><a href="/auth/logout">Logout</a></p>
                 {% else %}
                     <p>
@@ -50,6 +49,7 @@
                         <a href="/auth/register">Register</a>
                     </p>
                 {% endif %}
+            </div>
         </header>
         <main class="content">
             {% block content %}{% endblock %}
@@ -58,6 +58,6 @@
             <p>&copy; 2024 My Project</p>
         </footer>
     </div>
-    <script src="{{ url_for('static', path='/js/scripts.js') }}" rel="stylesheet"></script>
+    <script src="{{ url_for('static', path='/js/scripts.js') }}"></script>
 </body>
 </html>

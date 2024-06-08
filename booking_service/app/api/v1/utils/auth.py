@@ -50,7 +50,6 @@ def decode_access_token(token: str):
 
 
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
-    print(token)
     email = decode_access_token(token)
     if email is None:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")

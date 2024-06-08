@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ film.title }}{% endblock %}
+
+{% block content %}
+<h1>{{ film.title }}</h1>
+{% if film %}
+    <div class="film-detail">
+        {% if film.image_url %}
+            <div class="film-image">
+                <img src="{{ url_for('static', path=film.image_url) }}" alt="{{ film.title }}">
+            </div>
+        {% endif %}
+        <div class="film-info">
+            <p>{{ film.description }}</p>
+            <h2>Film Sessions</h2>
+            {% if film.sessions %}
+                <ul class="session-list">
+                {% for session in film.sessions %}
+                    <li>
+                        <a href="sessions/{{ session.id }}">
+                            <p>{{ session.datetime }} - {{ session.price }} - {{session.capacity}}</p>
+                        </a>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No sessions at this moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% else %}
+    <p>This film does not exist.</p>
+{% endif %}
+{% endblock %}
