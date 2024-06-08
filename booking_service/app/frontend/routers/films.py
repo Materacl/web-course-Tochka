@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File, Query
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -44,7 +46,7 @@ async def read_film(request: Request, film_id: int):
             if film["status"] == "not_available":
                 film = None
             else:
-                film = add_capacity_to_sessions(film)
+                film = format_sessions(film)
     return templates.TemplateResponse("film.html", {"request": request, "film": film})
 
 
@@ -108,7 +110,10 @@ async def update_film_status(
     return RedirectResponse(url="/films/1/12", status_code=303)
 
 
-def add_capacity_to_sessions(film):
+def format_sessions(film):
     for session in film.get("sessions", []):
         session["capacity"] = len(session["seats"])
+        dt_object = datetime.fromisoformat(session["datetime"])
+        session["datetime"] = dt_object.strftime("%B %d, %Y %H:%M:%S")
+        session["reserved_seats"] = len([seat for seat in session["seats"] if seat["status"] == "reserved"])
     return film

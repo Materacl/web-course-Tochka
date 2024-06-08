@@ -201,7 +201,7 @@ h4 {
 /* Content */
 .content {
     flex: 1;
-    padding: 40px;
+    padding: 60px;
     box-sizing: border-box;
 }
 
@@ -420,6 +420,10 @@ form button:hover {
 
 
 /*Films Cards List*/
+.films h1 {
+    align-items: center;
+    text-align: center;
+}
 .films-grid {
     display: flex;
     flex-wrap: wrap;
@@ -451,15 +455,21 @@ form button:hover {
     color: white;
 }
 
-.film-card.disabled {
+.disabled {
     opacity: 0.5;
     pointer-events: none;
+}
+
+.film-card.disabled form,
+.film-card.disabled form * {
+    pointer-events: auto;
 }
 
 .film-card-header {
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     width: 100%;
 }
 
@@ -472,7 +482,7 @@ form button:hover {
     margin-bottom: 10px;
 }
 
-.film-card-body .placeholder {
+.placeholder {
     background-color: #444;
     display: flex;
     align-items: center;
@@ -533,10 +543,10 @@ form button:hover {
     padding: 0;
     margin: 0;
     width: auto;
-    height: auto;
-    display: inline;
+    height: 100%;
     background: transparent;
     border: none;
+    box-shadow: none;
 }
 
 .film-status-button {
@@ -585,6 +595,11 @@ form button:hover {
     border-radius: 5px;
 }
 
+.add-film form textarea {
+    width: 80%;
+    height: 100px;
+}
+
 .add-film form button {
     background-color: #007bff;
     color: white;
@@ -602,7 +617,7 @@ form button:hover {
 .film-detail {
     display: flex;
     align-items: flex-start;
-    gap: 20px;
+    gap: 100px;
 }
 
 .film-image {
@@ -623,32 +638,56 @@ form button:hover {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    flex-flow: column wrap;
+    justify-content: space-between;
+    gap: 20px;
+    height: 100%;
 }
 
 .session-list li {
-    margin-bottom: 10px;
-}
-
-.session-list p {
-    color: white;
+    width: 700px;
+    align-items: center;
+    display: block;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
 }
 
 .session-list li a {
     display: block;
+    color: white;
     padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
     text-decoration: none;
-    color: #333;
-    transition: background-color 0.3s ease;
 }
 
-.session-list li a:hover {
+.session-list li:hover {
     background-color: #f0f0f0;
 }
 
-h1, h2 {
-    margin-top: 0;
+.session-list li:hover * {
+    color: black;
+}
+
+.session-list form {
+    padding: 10px;
+    margin: 0;
+    width: auto;
+    height: 100%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.session-list form button {
+    font-size: 1em;
+    background: transparent;
+}
+
+.session-list form button:hover {
+    color: black;
+    background: transparent;
 }
 
 /*Bookings list*/

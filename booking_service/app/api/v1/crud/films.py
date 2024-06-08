@@ -29,7 +29,6 @@ def update_film_status(db: Session, film_id: int, new_status: FilmStatus):
 
     db_film.status = new_status
     if new_status == FilmStatus.NOT_AVAILABLE:
-        db_film.status = FilmStatus.NOT_AVAILABLE
         for session in db_film.sessions:
             update_session_status(db, session_id=session.id, new_status=SessionStatus.CANCELED)
     db.commit()

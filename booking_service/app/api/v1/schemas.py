@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
 
-from .models import FilmStatus, SeatStatus, ReservationStatus
+from .models import FilmStatus, SeatStatus, ReservationStatus, SessionStatus
 
 
 class UserCreate(BaseModel):
@@ -75,6 +75,7 @@ class SessionCreate(BaseModel):
     film_id: int
     datetime: datetime
     price: float
+    capacity: int
 
 
 class Session(BaseModel):
@@ -82,6 +83,8 @@ class Session(BaseModel):
     film_id: int
     datetime: datetime
     price: float
+    capacity: int
+    status: SessionStatus
     bookings: List[Booking]
     seats: List[Seat]
 

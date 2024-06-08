@@ -10,23 +10,50 @@
             <div class="film-image">
                 <img src="{{ url_for('static', path=film.image_url) }}" alt="{{ film.title }}">
             </div>
+        {% else %}
+            <div class="placeholder">🎥 Film Image</div>
         {% endif %}
         <div class="film-info">
             <p>{{ film.description }}</p>
             <h2>Film Sessions</h2>
-            {% if film.sessions %}
-                <ul class="session-list">
-                {% for session in film.sessions %}
+            <ul class="session-list">
+                {% if film.sessions %}
+                    {% for session in film.sessions %}
+                        <li class="{% if session.status == 'canceled' %}disabled{% endif %}">
+                            <a href="{{ url_for('read_session', session_id=session.id) }}">
+                                <p>{{ session.datetime }} - {{ session.price }} - {{ session.reserved_seats}}/{{session.capacity}} - {{ session.status }}</p>
+                            </a>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <p>No sessions at this moment.</p>
+                {% endif %}
+
+                {% if request.state.is_admin %}
                     <li>
-                        <a href="sessions/{{ session.id }}">
-                            <p>{{ session.datetime }} - {{ session.price }} - {{session.capacity}}</p>
-                        </a>
+                        <form action="{{ url_for('create_session') }}" method="post">
+                            <input type="hidden" name="film_id" value="{{ film.id }}">
+                            <div>
+                                <label for="date">Date:</label>
+                                <input type="date" id="date" name="date" required>
+                            </div>
+                            <div>
+                                <label for="time">Time:</label>
+                                <input type="time" id="time" name="time" required>
+                            </div>
+                            <div>
+                                <label for="price">Price:</label>
+                                <input type="number" id="price" name="price" step="0.01" required>
+                            </div>
+                            <div>
+                                <label for="capacity">Capacity:</label>
+                                <input type="number" id="capacity" name="capacity" step="1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </form>
                     </li>
-                {% endfor %}
-                </ul>
-            {% else %}
-                <p>No sessions at this moment.</p>
-            {% endif %}
+                {% endif %}
+            </ul>
         </div>
     </div>
 {% else %}

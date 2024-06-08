@@ -14,10 +14,10 @@ router = APIRouter(
 
 
 @router.post("/", response_model=Session)
-def create_new_session(session: SessionCreate, capacity: int,
+def create_new_session(session: SessionCreate,
                        db: Session = Depends(get_db),
                        current_admin: User = Depends(get_current_active_admin)):
-    return create_session(db=db, session=session, capacity=capacity)
+    return create_session(db=db, session=session)
 
 
 @router.delete("/{session_id}/delete", response_model=Session)

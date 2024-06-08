@@ -19,7 +19,7 @@ STATUS_ORDER = {
 }
 
 
-def create_session(db: Session, session: SessionCreate, capacity: int = 10):
+def create_session(db: Session, session: SessionCreate):
     db_film = db.query(Film).filter(Film.id == session.film_id).first()
     if not db_film:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Film not found")
@@ -31,7 +31,7 @@ def create_session(db: Session, session: SessionCreate, capacity: int = 10):
     db.commit()
     db.refresh(db_session)
 
-    for seat_number in range(1, capacity + 1):
+    for seat_number in range(1, session.capacity + 1):
         seat = Seat(
             session_id=db_session.id,
         )
@@ -72,9 +72,10 @@ def update_session_status(db: Session, session_id: int, new_status: Optional[Ses
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="Cannot change status of a completed session")
 
-        if current_status != SessionStatus.CANCELED and STATUS_ORDER[new_status] != STATUS_ORDER[current_status] + 1:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Cannot change status to a non-next status")
+        if new_status != SessionStatus.CANCELED:
+            if STATUS_ORDER[new_status] != STATUS_ORDER[current_status] + 1:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail="Cannot change status of session to a non-next status")
 
         db_session.status = new_status
         handle_bookings_and_seats(db, db_session, new_status)
