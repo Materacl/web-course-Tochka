@@ -19,6 +19,7 @@ class SessionCreate(BaseModel):
     datetime: str
     price: float
     capacity: int
+    auto_booking: bool
 
 
 @router.get("/{session_id}")
@@ -28,7 +29,10 @@ async def read_session(request: Request, session_id: int):
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail="Error fetching session")
         session = response.json()
-    return templates.TemplateResponse("session.html", {"request": request, "session": session})
+        session = format_session(session)
+        response = await client.get(f"/films/{session['film_id']}")
+        film = response.json()
+    return templates.TemplateResponse("session.html", {"request": request, "session": session, "film": film})
 
 
 @router.post("/create_session", response_class=RedirectResponse)
@@ -39,9 +43,11 @@ async def create_session(
         time: str = Form(...),
         price: float = Form(...),
         capacity: int = Form(...),
+        auto_booking: bool = Form(False),
 ):
     if not request["state"]["is_admin"]:
         raise HTTPException(status_code=403, detail="Not authorized to perform this action")
+    print(auto_booking)
 
     datetime_str = f"{date}T{time}:00.000Z"
 
@@ -49,9 +55,10 @@ async def create_session(
         film_id=film_id,
         datetime=datetime_str,
         price=price,
-        capacity=capacity
+        capacity=capacity,
+        auto_booking=auto_booking
     )
-    print(new_session.dict())
+
     token = request.cookies.get("access_token")
     headers = {"Authorization": token}
     async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
@@ -60,3 +67,14 @@ async def create_session(
             raise HTTPException(status_code=response.status_code, detail="Error adding session")
 
     return RedirectResponse(url=f"/films/{film_id}", status_code=303)
+
+
+def format_session(session):
+    dt_object = datetime.fromisoformat(session["datetime"])
+    session["datetime"] = dt_object.strftime("%B %d, %Y %H:%M:%S")
+    session["reserved_seats"] = len([seat for seat in session["seats"] if seat["status"] == "reserved"])
+    i = 1
+    for seat in session["seats"]:
+        seat["number"] = i
+        i += 1
+    return session

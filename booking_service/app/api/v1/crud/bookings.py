@@ -7,7 +7,7 @@ from starlette import status
 from ..models import Session as SessionModel, Booking, Reservation, BookingStatus, ReservationStatus, SessionStatus
 from ..schemas import BookingCreate
 
-from .reservations import update_reservation_status
+from .reservations import update_reservation_status, get_reservations
 
 
 def create_booking(db: Session, booking: BookingCreate, user_id: int):
@@ -17,10 +17,13 @@ def create_booking(db: Session, booking: BookingCreate, user_id: int):
     if db_session.status != SessionStatus.UPCOMING:
         HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                       detail="Cannot create booking for a session that is not upcoming")
+
     db_booking = Booking(**booking.dict(), user_id=user_id)
     db.add(db_booking)
     db.commit()
     db.refresh(db_booking)
+    if db_session.auto_booking:
+        update_booking_status(db, db_booking.id, BookingStatus.CONFIRMED)
     return db_booking
 
 
@@ -41,6 +44,11 @@ def update_booking_status(db: Session, booking_id: int, new_status: BookingStatu
     if new_status == BookingStatus.CONFIRMED:
         for reservation in db_booking.reservations:
             update_reservation_status(db, reservation.id, ReservationStatus.CONFIRMED)
+            canceled_reservations = get_reservations(db,
+                                                     seat_id=reservation.seat_id,
+                                                     reservation_status=ReservationStatus.PENDING)
+            for canceled_reservation in canceled_reservations:
+                update_booking_status(db, canceled_reservation.booking_id, BookingStatus.CANCELED)
     elif new_status == BookingStatus.CANCELED:
         for reservation in db_booking.reservations:
             update_reservation_status(db, reservation.id, ReservationStatus.CANCELED)

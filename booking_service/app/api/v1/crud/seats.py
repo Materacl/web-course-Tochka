@@ -30,6 +30,8 @@ def update_seat_status(db: Session, seat_id: int, new_status: SeatStatus):
         if new_status == SeatStatus.AVAILABLE:
             db_seat.status = SeatStatus.AVAILABLE
         elif new_status == SeatStatus.RESERVED:
+            if db_seat.status == SeatStatus.RESERVED:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Seat is already reserved")
             db_seat.status = SeatStatus.RESERVED
         elif new_status == SeatStatus.CANCELED:
             db_seat.status = SeatStatus.CANCELED

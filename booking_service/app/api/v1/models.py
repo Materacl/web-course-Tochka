@@ -64,6 +64,7 @@ class Session(Base):
     datetime = Column(DateTime, index=True)
     price = Column(Float)
     capacity = Column(Integer)
+    auto_booking = Column(Boolean, default=False)
     status = Column(Enum(SessionStatus), default=SessionStatus.UPCOMING)
     film = relationship("Film", back_populates="sessions")
     bookings = relationship("Booking", back_populates="session", cascade="all, delete-orphan")

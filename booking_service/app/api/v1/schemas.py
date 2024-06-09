@@ -76,6 +76,7 @@ class SessionCreate(BaseModel):
     datetime: datetime
     price: float
     capacity: int
+    auto_booking: bool
 
 
 class Session(BaseModel):
@@ -84,6 +85,7 @@ class Session(BaseModel):
     datetime: datetime
     price: float
     capacity: int
+    auto_booking: bool
     status: SessionStatus
     bookings: List[Booking]
     seats: List[Seat]

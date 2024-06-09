@@ -1,8 +1,97 @@
 {% extends "base.html" %}
 
-{% block title %}Sessions{% endblock %}
+{% block title %}Session Booking{% endblock %}
 
 {% block content %}
-<h1>Session</h1>
-<p>{{ session.datetime }} - {{ session.price }}</p>
+<h1>Book Seats for Session</h1>
+<div class="session-info">
+    <p><strong>Date and Time:</strong> {{ session.datetime }}</p>
+    <p>
+        <strong>Price:</strong>
+        {% if request.state.is_admin %}
+            {{ session.price }}
+        {% else %}
+            {{ session.price }}
+        {% endif %}
+        {{ session.price }}
+    </p>
+    <p><strong>Capacity:</strong> {{ session.capacity }}</p>
+    <p><strong>Status:</strong> {{ session.status }}</p>
+    <p><strong>Auto booking:</strong> {{ session.auto_booking }}</p>
+</div>
+
+<h2>Select Seats</h2>
+<form class="booking-form" id="booking-form" action="{{ url_for('create_booking') }}" method="post">
+    <input type="hidden" name="session_id" value="{{ session.id }}">
+    <div class="seats-grid">
+        {% for seat in session.seats %}
+            <div class="seat {{ seat.status }}" data-seat-id="{{ seat.id }}" onclick="toggleSeatSelection(this)">
+                Seat {{ seat.number }} {% if request.state.is_admin %}({{ seat.id }}){% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary" disabled>Confirm Booking</button>
+</form>
+
+
+{% if request.state.email %}
+<h2>My bookings</h2>
+<ul class="bookings-list">
+    {% for booking in session.bookings %}
+        {% if booking.user_id == request.state.user_id %}
+            <li class="booking-item">
+                <div>
+                    <p><strong>Booking ID:</strong> {{ booking.id }} </p>
+                    <p><strong>User:</strong> {{ booking.user_id }} </p>
+                    <p><strong>Seats:</strong>
+                        {% for reservation in booking.reservations %}
+                            {{ reservation.seat_id }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p><strong>Status:</strong> {{ booking.status }}</p>
+                </div>
+                {% if booking.status == "canceled" %}
+                {% else %}
+                <form action="{{ url_for('change_booking_status', booking_id=booking.id, new_status='canceled') }}" method="post">
+                    <button type="submit" class="btn btn-primary">Cancel</button>
+                </form>
+                {% endif %}
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% if request.state.is_admin %}
+<h2>All Bookings for this Session</h2>
+<ul class="bookings-list">
+    {% for booking in session.bookings %}
+        <li class="booking-item">
+            <div>
+                <p><strong>Booking ID:</strong> {{ booking.id }} </p>
+                <p><strong>User:</strong> {{ booking.user_id }} </p>
+                <p><strong>Seats:</strong>
+                    {% for reservation in booking.reservations %}
+                        {{ reservation.seat_id }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <p><strong>Status:</strong> {{ booking.status }}</p>
+            </div>
+            {% if booking.status == "pending" %}
+            <form action="{{ url_for('change_booking_status', booking_id=booking.id, new_status='confirmed') }}" method="post">
+                <button type="submit" class="btn btn-primary">Confirm</button>
+            </form>
+            <form action="{{ url_for('change_booking_status', booking_id=booking.id, new_status='canceled') }}" method="post">
+                <button type="submit" class="btn btn-primary">Cancel</button>
+            </form>
+            {% elif booking.status == "confirmed" %}
+            <form action="{{ url_for('change_booking_status', booking_id=booking.id, new_status='canceled') }}" method="post">
+                <button type="submit" class="btn btn-primary">Cancel</button>
+            </form>
+            {% else %}
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% endblock %}

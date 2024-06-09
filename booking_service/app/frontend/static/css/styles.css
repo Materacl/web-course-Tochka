@@ -32,6 +32,7 @@ h1 {
     margin: 0;
     padding: 20px;
     position: relative;
+    text-align: center
 }
 
 h2 {
@@ -278,17 +279,55 @@ select {
     color: #c9d1d9;
 }
 
+/*Forms*/
+form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+form h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-align: center;
+    color: #333;
+}
+
+form label {
+    display: block;
+    font-weight: bold;
+}
+
+form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
 form button {
-    background-color: #007bff;
-    color: #fff;
     padding: 10px;
     border: none;
     border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 form button:hover {
     background-color: #0056b3;
+}
+
+form p.error {
+    color: #ff0000;
+    font-weight: bold;
+    text-align: center;
 }
 
 
@@ -647,12 +686,14 @@ form button:hover {
 }
 
 .session-list li {
-    width: 700px;
-    align-items: center;
     display: block;
+    width: 50%;
+    align-items: center;
+    align-content: center;
     border: 1px solid #ddd;
     border-radius: 8px;
     transition: background-color 0.3s ease;
+    padding: 10px;
 }
 
 .session-list li a {
@@ -671,6 +712,11 @@ form button:hover {
 }
 
 .session-list form {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-items: center;
     padding: 10px;
     margin: 0;
     width: auto;
@@ -683,6 +729,7 @@ form button:hover {
 .session-list form button {
     font-size: 1em;
     background: transparent;
+    width: auto;
 }
 
 .session-list form button:hover {
@@ -690,10 +737,20 @@ form button:hover {
     background: transparent;
 }
 
+.session-list form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
 /*Bookings list*/
 .bookings-list {
     list-style-type: none;
     padding: 0;
+    margin-bottom: 25px;
 }
 
 .bookings-list-item {
@@ -744,6 +801,111 @@ form button:hover {
 
 .booking-date {
     color: #888;
+}
+
+/* Session Info Styles */
+.session-details{
+    display: flex;
+    margin-bottom: 25px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.session-details .film-detail{
+    flex-direction: column;
+    gap: 0;
+}
+
+.session-info {
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.session-info p {
+    margin: 10px 0;
+}
+
+/*Booking form*/
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Seats Grid Styles */
+.seats-grid {
+    display: flex;
+    flex-direction: column;
+    flex-flow: column wrap;
+    justify-content: center;
+    gap: 10px;
+    height: 1000px;
+}
+
+.seat {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    height: 20px;
+}
+
+.seat.available {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.seat.selected {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.seat.reserved {
+    background-color: #fff3cd;
+    color: #856404;
+    pointer-events: none;
+}
+
+.seat.canceled {
+    background-color: #f8d7da;
+    color: #721c24;
+    pointer-events: none;
+}
+
+/*Bookings*/
+.bookings-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.booking-item {
+    display: flex;
+    align-items: center;
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    gap: 10px;
+}
+
+.booking-item form {
+    margin: 0;
 }
 
 /* Footer */

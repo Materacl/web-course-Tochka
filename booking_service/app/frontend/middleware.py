@@ -12,6 +12,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 token = token[len("Bearer "):]
             try:
                 payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+                request.state.user_id = payload.get("id")
                 request.state.email = payload.get("sub")
                 request.state.nickname = payload.get("nickname", "")
                 request.state.is_admin = payload.get("is_admin", False)

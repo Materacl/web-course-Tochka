@@ -112,7 +112,6 @@ async def update_film_status(
 
 def format_sessions(film):
     for session in film.get("sessions", []):
-        session["capacity"] = len(session["seats"])
         dt_object = datetime.fromisoformat(session["datetime"])
         session["datetime"] = dt_object.strftime("%B %d, %Y %H:%M:%S")
         session["reserved_seats"] = len([seat for seat in session["seats"] if seat["status"] == "reserved"])
