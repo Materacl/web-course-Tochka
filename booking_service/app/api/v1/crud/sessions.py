@@ -97,6 +97,15 @@ def update_session_status(db: Session, session_id: int, new_status: Optional[Ses
     return db_session
 
 
+def update_session_price(db: Session, session_id: int, new_price: float):
+    db_session = get_session(db, session_id)
+
+    db_session.price = new_price
+
+    db.commit()
+    return db_session
+
+
 def get_session(db: Session, session_id: int):
     db_session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not db_session:

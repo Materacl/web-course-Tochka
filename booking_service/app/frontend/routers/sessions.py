@@ -69,6 +69,41 @@ async def create_session(
     return RedirectResponse(url=f"/films/{film_id}", status_code=303)
 
 
+@router.post("/{session_id}/status/{new_status}")
+async def change_session_status(request: Request, session_id: int, new_status: str):
+    if not request.state.is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
+
+    token = request.cookies.get("access_token")
+    headers = {"Authorization": token}
+    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
+        response = await client.post(f"/sessions/{session_id}/status/{new_status}")
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail="Error changing status of session")
+        session = response.json()
+        print(session)
+
+    return RedirectResponse(url=f"/films/{session['film_id']}", status_code=303)
+
+
+@router.post("/change_session_price")
+async def change_session_price(request: Request,
+                               session_id: int = Form(...),
+                               new_price: float = Form(...)):
+    if not request.state.is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
+
+    token = request.cookies.get("access_token")
+    headers = {"Authorization": token}
+    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
+        response = await client.post(f"/sessions/{session_id}/price/{new_price}")
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail="Error changing status of session")
+        session = response.json()
+
+    return RedirectResponse(url=f"/sessions/{session['id']}", status_code=303)
+
+
 def format_session(session):
     dt_object = datetime.fromisoformat(session["datetime"])
     session["datetime"] = dt_object.strftime("%B %d, %Y %H:%M:%S")

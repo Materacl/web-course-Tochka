@@ -8,13 +8,17 @@
     <p><strong>Date and Time:</strong> {{ session.datetime }}</p>
     <p>
         <strong>Price:</strong>
-        {% if request.state.is_admin %}
-            {{ session.price }}
-        {% else %}
-            {{ session.price }}
-        {% endif %}
         {{ session.price }}
     </p>
+    {% if request.state.is_admin %}
+        <form action="{{ url_for('change_session_price') }}" method="post">
+            <input type="hidden" name="session_id" value="{{ session.id }}">
+            <div>
+                <input type="number" id="price" name="new_price" step="0.01" placeholder="Enter new price" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Set</button>
+        </form>
+    {% endif %}
     <p><strong>Capacity:</strong> {{ session.capacity }}</p>
     <p><strong>Status:</strong> {{ session.status }}</p>
     <p><strong>Auto booking:</strong> {{ session.auto_booking }}</p>

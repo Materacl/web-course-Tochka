@@ -3,7 +3,8 @@ from typing import List, Optional
 from ..database import get_db
 from ..models import SessionStatus
 from ..schemas import SessionCreate, Session, User
-from ..crud.sessions import create_session, get_sessions, get_session, delete_session, update_session_status
+from ..crud.sessions import create_session, get_sessions, get_session, delete_session, update_session_status, \
+    update_session_price
 from ..utils.auth import get_current_active_admin
 
 router = APIRouter(
@@ -27,12 +28,20 @@ def delete_session_from_db(session_id: int,
     return delete_session(db, session_id)
 
 
-@router.post("/{session_id}/{new_status}", response_model=Session)
+@router.post("/{session_id}/status/{new_status}", response_model=Session)
 def set_session_status(session_id: int,
                        new_status: SessionStatus,
                        db: Session = Depends(get_db),
                        current_admin: User = Depends(get_current_active_admin)):
     return update_session_status(db, session_id, new_status)
+
+
+@router.post("/{session_id}/price/{new_price}", response_model=Session)
+def set_session_price(session_id: int,
+                      new_price: float,
+                      db: Session = Depends(get_db),
+                      current_admin: User = Depends(get_current_active_admin)):
+    return update_session_price(db, session_id, new_price)
 
 
 @router.get("/{session_id}", response_model=Session)
