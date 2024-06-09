@@ -15,43 +15,43 @@ router = APIRouter(
 
 
 @router.post("/", response_model=Session)
-def create_new_session(session: SessionCreate,
-                       db: Session = Depends(get_db),
-                       current_admin: User = Depends(get_current_active_admin)):
+async def create_new_session(session: SessionCreate,
+                             db: Session = Depends(get_db),
+                             current_admin: User = Depends(get_current_active_admin)):
     return create_session(db=db, session=session)
 
 
 @router.delete("/{session_id}/delete", response_model=Session)
-def delete_session_from_db(session_id: int,
-                           db: Session = Depends(get_db),
-                           current_admin: User = Depends(get_current_active_admin)):
+async def delete_session_from_db(session_id: int,
+                                 db: Session = Depends(get_db),
+                                 current_admin: User = Depends(get_current_active_admin)):
     return delete_session(db, session_id)
 
 
 @router.post("/{session_id}/status/{new_status}", response_model=Session)
-def set_session_status(session_id: int,
-                       new_status: SessionStatus,
-                       db: Session = Depends(get_db),
-                       current_admin: User = Depends(get_current_active_admin)):
+async def set_session_status(session_id: int,
+                             new_status: SessionStatus,
+                             db: Session = Depends(get_db),
+                             current_admin: User = Depends(get_current_active_admin)):
     return update_session_status(db, session_id, new_status)
 
 
 @router.post("/{session_id}/price/{new_price}", response_model=Session)
-def set_session_price(session_id: int,
-                      new_price: float,
-                      db: Session = Depends(get_db),
-                      current_admin: User = Depends(get_current_active_admin)):
+async def set_session_price(session_id: int,
+                            new_price: float,
+                            db: Session = Depends(get_db),
+                            current_admin: User = Depends(get_current_active_admin)):
     return update_session_price(db, session_id, new_price)
 
 
 @router.get("/{session_id}", response_model=Session)
-def read_session(session_id: int, db: Session = Depends(get_db)):
+async def read_session(session_id: int, db: Session = Depends(get_db)):
     return get_session(db, session_id)
 
 
 @router.get("/", response_model=List[Session])
-def read_sessions(skip: Optional[int] = None, limit: Optional[int] = None,
-                  film_id: Optional[int] = None, session_status: Optional[SessionStatus] = None,
-                  db: Session = Depends(get_db)):
+async def read_sessions(skip: Optional[int] = None, limit: Optional[int] = None,
+                        film_id: Optional[int] = None, session_status: Optional[SessionStatus] = None,
+                        db: Session = Depends(get_db)):
     return get_sessions(db, skip=skip, limit=limit,
                         film_id=film_id, session_status=session_status)

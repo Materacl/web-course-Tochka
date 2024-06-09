@@ -21,7 +21,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 
 @router.post("/register", response_model=User)
-def register_user(user: UserCreate, db: Session = Depends(get_db)):
+async def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = get_user(db, user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -34,7 +34,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/token", response_model=dict)
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = get_user(db, form_data.username)
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect email or password")

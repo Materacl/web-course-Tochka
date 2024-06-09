@@ -16,6 +16,7 @@ class User(BaseModel):
     nickname: Optional[str] = None
     is_active: bool
     is_admin: bool
+    notifications: bool
 
     class Config:
         orm_mode = True

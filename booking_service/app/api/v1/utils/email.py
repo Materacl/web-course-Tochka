@@ -1,4 +1,4 @@
-from fastapi_mail import ConnectionConfig
+from fastapi_mail import ConnectionConfig, FastMail, MessageSchema
 from ..config import settings
 
 conf = ConnectionConfig(
@@ -11,3 +11,9 @@ conf = ConnectionConfig(
     MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
     USE_CREDENTIALS=settings.USE_CREDENTIALS
 )
+
+
+async def send_notification(message: MessageSchema):
+    fm = FastMail(conf)
+    await fm.send_message(message)
+    return True

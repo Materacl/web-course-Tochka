@@ -17,31 +17,31 @@ router = APIRouter(
 
 
 @router.post("/", response_model=Reservation)
-def create_new_reservation(reservation: ReservationCreate,
-                           db: Session = Depends(get_db),
-                           current_user: User = Depends(get_current_user)):
+async def create_new_reservation(reservation: ReservationCreate,
+                                 db: Session = Depends(get_db),
+                                 current_user: User = Depends(get_current_user)):
     return create_reservation(db=db, reservation=reservation)
 
 
 @router.delete("/{reservation_id}/delete", response_model=Reservation)
-def delete_booking_from_db(reservation_id: int,
-                           db: Session = Depends(get_db),
-                           current_admin: User = Depends(get_current_active_admin)):
+async def delete_booking_from_db(reservation_id: int,
+                                 db: Session = Depends(get_db),
+                                 current_admin: User = Depends(get_current_active_admin)):
     return delete_reservation(db, reservation_id)
 
 
 @router.post("/{reservation_id}/{new_status}", response_model=Reservation)
-def set_booking_status(booking_id: int,
-                       new_status: ReservationStatus,
-                       db: Session = Depends(get_db),
-                       current_user: User = Depends(get_current_active_admin)):
+async def set_booking_status(booking_id: int,
+                             new_status: ReservationStatus,
+                             db: Session = Depends(get_db),
+                             current_user: User = Depends(get_current_active_admin)):
     return update_reservation_status(db, booking_id, new_status)
 
 
 @router.delete("/{reservation_id}", response_model=Reservation)
-def cancel_user_reservation(reservation_id: int,
-                            db: Session = Depends(get_db),
-                            current_user: User = Depends(get_current_user)):
+async def cancel_user_reservation(reservation_id: int,
+                                  db: Session = Depends(get_db),
+                                  current_user: User = Depends(get_current_user)):
     db_reservation = get_reservation(db, reservation_id=reservation_id)
     if db_reservation.booking.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to cancel this reservation")
@@ -50,11 +50,11 @@ def cancel_user_reservation(reservation_id: int,
 
 
 @router.get("/{reservation_id}", response_model=Reservation)
-def read_reservations(reservation_id: int = 0, db: Session = Depends(get_db)):
+async def read_reservations(reservation_id: int = 0, db: Session = Depends(get_db)):
     return get_reservation(db, reservation_id)
 
 
 @router.get("/", response_model=List[Reservation])
-def read_reservations(skip: int = 0, limit: int = 10,
-                      db: Session = Depends(get_db)):
+async def read_reservations(skip: int = 0, limit: int = 10,
+                            db: Session = Depends(get_db)):
     return get_reservations(db, skip=skip, limit=limit)

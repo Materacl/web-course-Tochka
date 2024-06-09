@@ -41,6 +41,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     nickname = Column(String)
     hashed_password = Column(String)
+    notifications = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     bookings = relationship("Booking", back_populates="user", cascade="all, delete-orphan")

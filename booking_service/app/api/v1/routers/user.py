@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.put("/change_nickname/{new_nickname}", response_model=User)
-def change_nickname(new_nickname: str,
-                    db: Session = Depends(get_db),
-                    current_user: User = Depends(get_current_active_user)):
+async def change_nickname(new_nickname: str,
+                          db: Session = Depends(get_db),
+                          current_user: User = Depends(get_current_active_user)):
     return update_user_nickname(db, current_user.id, new_nickname)

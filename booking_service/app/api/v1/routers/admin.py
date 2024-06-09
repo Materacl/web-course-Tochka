@@ -15,5 +15,5 @@ router = APIRouter(
 
 
 @router.put("/users/{user_id}/set_admin", response_model=User)
-def set_user_admin(email: str, db: Session = Depends(get_db)):
+async def set_user_admin(email: str, db: Session = Depends(get_db)):
     return grant_user_admin(db, email)
