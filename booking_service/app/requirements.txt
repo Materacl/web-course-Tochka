@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-sqlalchemy
-pydantic
-fastapi-mail
-celery
-redis
