@@ -1015,3 +1015,110 @@ form p.error {
         background-color: #0056b3;
     }
 }
+
+/* Profile container */
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    background-color: #161b22;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Profile header */
+.profile-header {
+    margin-bottom: 20px;
+}
+
+.profile-header h1 {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+    text-align: center;
+}
+
+/* Profile information */
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-image img {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #007bff;
+}
+
+.profile-details {
+    text-align: left;
+}
+
+.profile-details h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0 0 10px 0;
+}
+
+.profile-details p {
+    font-size: 18px;
+    color: #c9d1d9;
+    margin: 5px 0;
+}
+
+.change-nickname-button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.change-nickname-button:hover {
+    background-color: #0056b3;
+}
+
+.nickname-form-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.nickname-form-container input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.nickname-form-container button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.nickname-form-container button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+}
+
+.nickname-form-container button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.nickname-form-container button[type="button"] {
+    background-color: #ccc;
+}
+
+.nickname-form-container button[type="button"]:hover {
+    background-color: #999;
+}

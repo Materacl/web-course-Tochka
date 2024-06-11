@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -7,6 +9,10 @@ from ..schemas import FilmCreate, Film, User
 from ..crud.films import get_films, get_film, create_film, delete_film, update_film_status
 from ..utils.auth import get_current_active_admin
 import shutil
+
+# Define the base directory
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+STATIC_DIR = BASE_DIR / "frontend" / "v1" / "static"
 
 router = APIRouter(
     prefix="/films",
@@ -28,11 +34,16 @@ async def upload_film_image(film_id: int, file: UploadFile = File(...),
                             current_admin: User = Depends(get_current_active_admin)):
     db_film = get_film(db, film_id)
 
+    # Create the directory if it doesn't exist
     file_location = f"images/films/{film_id}_{file.filename}"
-    with open(f"frontend/static/{file_location}", "wb+") as file_object:
+    db_film.image_url = file_location
+    file_location = STATIC_DIR / file_location
+    file_location.parent.mkdir(parents=True, exist_ok=True)
+
+    # Save the file
+    with file_location.open("wb+") as file_object:
         shutil.copyfileobj(file.file, file_object)
 
-    db_film.image_url = file_location
     db.commit()
     db.refresh(db_film)
     return db_film
