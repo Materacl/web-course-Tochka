@@ -1,16 +1,21 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
-
 from .models import FilmStatus, SeatStatus, ReservationStatus, SessionStatus
 
 
 class UserCreate(BaseModel):
+    """
+    Schema for creating a new user.
+    """
     email: EmailStr
     password: str
 
 
 class User(BaseModel):
+    """
+    Schema for representing a user.
+    """
     id: int
     email: EmailStr
     nickname: Optional[str] = None
@@ -23,15 +28,24 @@ class User(BaseModel):
 
 
 class UserLogin(BaseModel):
+    """
+    Schema for user login.
+    """
     email: EmailStr
     password: str
 
 
 class SeatCreate(BaseModel):
+    """
+    Schema for creating a new seat.
+    """
     session_id: int
 
 
 class Seat(BaseModel):
+    """
+    Schema for representing a seat.
+    """
     id: int
     session_id: int
     user_id: Optional[int] = None
@@ -42,11 +56,17 @@ class Seat(BaseModel):
 
 
 class ReservationCreate(BaseModel):
+    """
+    Schema for creating a new reservation.
+    """
     booking_id: int
     seat_id: int
 
 
 class Reservation(BaseModel):
+    """
+    Schema for representing a reservation.
+    """
     id: int
     booking_id: int
     seat_id: int
@@ -58,10 +78,16 @@ class Reservation(BaseModel):
 
 
 class BookingCreate(BaseModel):
+    """
+    Schema for creating a new booking.
+    """
     session_id: int
 
 
 class Booking(BaseModel):
+    """
+    Schema for representing a booking.
+    """
     id: int
     session_id: int
     user_id: int
@@ -73,6 +99,9 @@ class Booking(BaseModel):
 
 
 class SessionCreate(BaseModel):
+    """
+    Schema for creating a new session.
+    """
     film_id: int
     datetime: datetime
     price: float
@@ -81,6 +110,9 @@ class SessionCreate(BaseModel):
 
 
 class Session(BaseModel):
+    """
+    Schema for representing a session.
+    """
     id: int
     film_id: int
     datetime: datetime
@@ -96,6 +128,9 @@ class Session(BaseModel):
 
 
 class FilmCreate(BaseModel):
+    """
+    Schema for creating a new film.
+    """
     title: str
     description: str
     duration: int
@@ -103,6 +138,9 @@ class FilmCreate(BaseModel):
 
 
 class Film(BaseModel):
+    """
+    Schema for representing a film.
+    """
     id: int
     title: str
     description: str
@@ -116,4 +154,8 @@ class Film(BaseModel):
 
 
 class AdminAction(BaseModel):
+    """
+    Schema for representing an admin action.
+    """
     status: str
+    

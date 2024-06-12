@@ -1,0 +1,32 @@
+# Dockerfile.test
+FROM python:3.10-slim-buster
+
+# Set the working directory
+WORKDIR /booking_service
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY ./api/requirements.txt /booking_service/requirements.txt
+RUN pip install --no-cache-dir -r /booking_service/requirements.txt
+
+# Install testing dependencies
+RUN pip install --no-cache-dir pytest pytest-asyncio
+
+# Copy the source code
+COPY ./api  /booking_service
+
+# Copy the alembic configuration
+COPY ./api/alembic.ini /booking_service/alembic.ini
+
+# Copy the entrypoint script for tests
+COPY ./api/entrypoint_test.sh /booking_service/entrypoint_test.sh
+
+# Set execute permissions for the entrypoint script
+RUN chmod +x /booking_service/entrypoint_test.sh
+
+# Set the entrypoint for the test container
+ENTRYPOINT ["/booking_service/entrypoint_test.sh"]

@@ -1,4 +1,3 @@
-# frontend/routers/auth.py
 from fastapi import APIRouter, Request, Form, Response, Depends
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -7,45 +6,98 @@ import httpx
 from ..config import settings
 
 router = APIRouter(
-    prefix="/auth"
+    prefix="/auth",
+    tags=["auth"],
+    responses={404: {"description": "Not found"}},
 )
+
 templates = Jinja2Templates(directory="v1/templates")
 
 
-@router.get("/register", response_class=HTMLResponse)
+@router.get("/register", response_class=HTMLResponse, summary="Register page", tags=["auth"])
 async def get_register(request: Request):
+    """
+    Render the registration page.
+
+    Args:
+        request (Request): The request object.
+
+    Returns:
+        HTMLResponse: The rendered registration page.
+    """
     return templates.TemplateResponse("register.html", {"request": request})
 
 
-@router.post("/register")
+@router.post("/register", summary="Register a new user", tags=["auth"])
 async def post_register(request: Request, email: str = Form(...), password: str = Form(...)):
+    """
+    Handle user registration.
+
+    Args:
+        request (Request): The request object.
+        email (str): The user's email.
+        password (str): The user's password.
+
+    Returns:
+        RedirectResponse: Redirects to the login page on success.
+        HTMLResponse: Renders the registration page with an error message on failure.
+    """
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
         response = await client.post("/auth/register", json={"email": email, "password": password})
-    if response.status_code == 200:
+    if response.status_code == 201:
         return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("register.html", {"request": request, "error": "Registration failed"})
 
 
-@router.get("/login", response_class=HTMLResponse)
+@router.get("/login", response_class=HTMLResponse, summary="Login page", tags=["auth"])
 async def get_login(request: Request):
+    """
+    Render the login page.
+
+    Args:
+        request (Request): The request object.
+
+    Returns:
+        HTMLResponse: The rendered login page.
+    """
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-@router.post("/login")
+@router.post("/login", summary="User login", tags=["auth"])
 async def post_login(request: Request, email: str = Form(...), password: str = Form(...)):
+    """
+    Handle user login.
+
+    Args:
+        request (Request): The request object.
+        email (str): The user's email.
+        password (str): The user's password.
+
+    Returns:
+        RedirectResponse: Redirects to the home page on success with a set cookie.
+        HTMLResponse: Renders the login page with an error message on failure.
+    """
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
-        response = await client.post("/auth/token",
-                                     data={"username": email, "password": password})
+        response = await client.post("/auth/token", data={"username": email, "password": password})
     if response.status_code == 200:
         token = response.json()["access_token"]
-        response = RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-        response.set_cookie(key="access_token", value=f"Bearer {token}", httponly=True)
-        return response
+        redirect_response = RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+        redirect_response.set_cookie(key="access_token", value=f"Bearer {token}", httponly=True, secure=True)
+        return redirect_response
     return templates.TemplateResponse("login.html", {"request": request, "error": "Login failed"})
 
 
-@router.get("/logout")
+@router.get("/logout", summary="User logout", tags=["auth"])
 async def logout(request: Request):
+    """
+    Handle user logout.
+
+    Args:
+        request (Request): The request object.
+
+    Returns:
+        RedirectResponse: Redirects to the home page and clears the access token cookie.
+    """
     response = RedirectResponse(url="/")
     response.delete_cookie("access_token")
     return response

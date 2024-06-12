@@ -1,9 +1,5 @@
 from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
 import os
-
-# Load environment variables from .env file
-load_dotenv(".env")
 
 
 class Settings(BaseSettings):
@@ -11,6 +7,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = os.getenv("ALGORITHM")
     API_URL: str = os.getenv("API_URL")
     USE_CREDENTIALS: bool = os.getenv("USE_CREDENTIALS") == 'true'
+    CORS_ORIGINS: str = os.getenv("CORS_ORIGINS").split(",")
 
 
 settings = Settings()

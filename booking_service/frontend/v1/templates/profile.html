@@ -24,6 +24,14 @@
                 </form>
             </div>
             <p>Email: {{ request.state.email }}</p>
+            <div class="subscription-container">
+                <form action="{{ url_for('subscribe') }}" method="post" style="display: inline;">
+                    <button type="submit">Subscribe to Notifications</button>
+                </form>
+                <form action="{{ url_for('unsubscribe') }}" method="post" style="display: inline;">
+                    <button type="submit">Unsubscribe from Notifications</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

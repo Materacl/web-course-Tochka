@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: api/Dockerfile
-    volumes:
-      - ./api:/booking_service
     env_file:
       - ./api/.env.docker
     ports:
@@ -18,8 +16,6 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    volumes:
-      - ./frontend:/booking_service
     env_file:
       - ./frontend/.env.docker
     ports:
@@ -33,6 +29,15 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - ./api/.env.docker
+
+  test:
+    build:
+      context: .
+      dockerfile: api/Dockerfile.test
+    env_file:
+      - ./api/.env.test
+    depends_on:
+      - db
 
 volumes:
   postgres_data:

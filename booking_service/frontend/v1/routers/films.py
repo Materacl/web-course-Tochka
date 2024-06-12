@@ -1,26 +1,39 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File, Query
+from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File, status
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse, HTMLResponse
 from pydantic import BaseModel
-from fastapi.responses import RedirectResponse
 
 from ..config import settings
 import httpx
 
 router = APIRouter(
-    prefix="/films"
+    prefix="/films",
+    tags=["films"],
+    responses={404: {"description": "Not found"}},
 )
+
 templates = Jinja2Templates(directory="v1/templates")
 
 
-@router.get("/{page}/{limit}")
+@router.get("/{page}/{limit}", response_class=HTMLResponse, summary="Get films list", tags=["films"])
 async def read_films(request: Request, page: int = 1, limit: int = 12):
+    """
+    Get a list of films with pagination.
+
+    Args:
+        request (Request): The request object.
+        page (int): The current page number.
+        limit (int): The number of films per page.
+
+    Returns:
+        TemplateResponse: The films list page.
+    """
     skip = (page - 1) * limit
-    limit = skip + 12
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
         response = await client.get("/films/", params={"skip": skip, "limit": limit})
-        if response.status_code != 200:
+        if response.status_code != status.HTTP_200_OK:
             films = []
             total_films = 0
         else:
@@ -28,18 +41,30 @@ async def read_films(request: Request, page: int = 1, limit: int = 12):
             response = await client.get("/films/")
             total_films = len(response.json())
 
-    return templates.TemplateResponse("films.html", {"request": request,
-                                                     "films": films,
-                                                     "page": page,
-                                                     "limit": limit,
-                                                     "total_films": total_films})
+    return templates.TemplateResponse("films.html", {
+        "request": request,
+        "films": films,
+        "page": page,
+        "limit": limit,
+        "total_films": total_films
+    })
 
 
-@router.get("/{film_id}")
+@router.get("/{film_id}", response_class=HTMLResponse, summary="Get film details", tags=["films"])
 async def read_film(request: Request, film_id: int):
+    """
+    Get details of a specific film by ID.
+
+    Args:
+        request (Request): The request object.
+        film_id (int): The ID of the film.
+
+    Returns:
+        TemplateResponse: The film details page.
+    """
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
         response = await client.get(f"/films/{film_id}")
-        if response.status_code != 200:
+        if response.status_code != status.HTTP_200_OK:
             film = None
         else:
             film = response.json()
@@ -57,60 +82,100 @@ class FilmCreate(BaseModel):
     status: str
 
 
-@router.post("/add_film", response_class=RedirectResponse)
+@router.post("/add_film", response_class=RedirectResponse, summary="Add a new film", tags=["films"])
 async def add_film(
         request: Request,
         title: str = Form(...),
         description: str = Form(...),
         image: UploadFile = File(...),
         duration: int = Form(...),
-        status: str = Form(...),
+        film_status: str = Form(...),
 ):
-    if not request["state"]["is_admin"]:
-        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
+    """
+    Add a new film.
+
+    Args:
+        request (Request): The request object.
+        title (str): The title of the film.
+        description (str): The description of the film.
+        image (UploadFile): The image file for the film.
+        duration (int): The duration of the film in minutes.
+        film_status (str): The status of the film.
+
+    Returns:
+        RedirectResponse: Redirects to the films list page on success.
+
+    Raises:
+        HTTPException: If the user is not authorized or an error occurs.
+    """
+    if not request.state.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
 
     new_film = FilmCreate(
         title=title,
         description=description,
         duration=duration,
-        status=status
+        status=film_status
     )
 
     token = request.cookies.get("access_token")
     headers = {"Authorization": token}
     async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
         response = await client.post("/films/", json=new_film.dict())
-        if response.status_code != 200:
+        if response.status_code != status.HTTP_201_CREATED:
             raise HTTPException(status_code=response.status_code, detail="Error adding film")
 
         film_id = response.json()["id"]
         files = {"file": (image.filename, image.file, image.content_type)}
         response = await client.post(f"/films/{film_id}/upload_image", files=files)
-        if response.status_code != 200:
+        if response.status_code != status.HTTP_200_OK:
             raise HTTPException(status_code=response.status_code, detail="Error adding image to film")
 
-    return RedirectResponse(url="/films/1/12", status_code=303)
+    return RedirectResponse(url="/films/1/12", status_code=status.HTTP_303_SEE_OTHER)
 
 
-@router.post("/{film_id}/update_status", response_class=RedirectResponse)
+@router.post("/{film_id}/update_status", response_class=RedirectResponse, summary="Update film status", tags=["films"])
 async def update_film_status(
         request: Request,
         film_id: int,
         new_status: str = Form(...),
 ):
-    if not request["state"]["is_admin"]:
-        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
+    """
+    Update the status of a film.
+
+    Args:
+        request (Request): The request object.
+        film_id (int): The ID of the film.
+        new_status (str): The new status to set for the film.
+
+    Returns:
+        RedirectResponse: Redirects to the films list page on success.
+
+    Raises:
+        HTTPException: If the user is not authorized or an error occurs.
+    """
+    if not request.state.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
 
     token = request.cookies.get("access_token")
     headers = {"Authorization": token}
     async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
-        response = await client.post(f"/films/{film_id}/{new_status}")
-        if response.status_code != 200:
+        response = await client.post(f"/films/{film_id}/status/{new_status}")
+        if response.status_code != status.HTTP_200_OK:
             raise HTTPException(status_code=response.status_code, detail="Error changing film status")
-    return RedirectResponse(url="/films/1/12", status_code=303)
+    return RedirectResponse(url="/films/1/12", status_code=status.HTTP_303_SEE_OTHER)
 
 
 def format_sessions(film):
+    """
+    Format session details within a film.
+
+    Args:
+        film (dict): The film data.
+
+    Returns:
+        dict: The film data with formatted session details.
+    """
     for session in film.get("sessions", []):
         dt_object = datetime.fromisoformat(session["datetime"])
         session["datetime"] = dt_object.strftime("%B %d, %Y %H:%M:%S")

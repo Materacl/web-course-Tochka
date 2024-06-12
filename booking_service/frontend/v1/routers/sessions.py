@@ -1,18 +1,20 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File, Query
+from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File, status
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 
 from ..config import settings
 import httpx
 
 router = APIRouter(
-    prefix="/sessions"
+    prefix="/sessions",
+    tags=["sessions"],
+    responses={404: {"description": "Not found"}},
 )
-templates = Jinja2Templates(directory="v1/templates")
 
+templates = Jinja2Templates(directory="v1/templates")
 
 class SessionCreate(BaseModel):
     film_id: int
@@ -21,12 +23,24 @@ class SessionCreate(BaseModel):
     capacity: int
     auto_booking: bool
 
-
-@router.get("/{session_id}")
+@router.get("/{session_id}", response_class=HTMLResponse, summary="Get session details", tags=["sessions"])
 async def read_session(request: Request, session_id: int):
+    """
+    Get details of a specific session by ID.
+
+    Args:
+        request (Request): The request object.
+        session_id (int): The ID of the session.
+
+    Returns:
+        TemplateResponse: The session details page.
+
+    Raises:
+        HTTPException: If an error occurs while fetching the session details.
+    """
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
         response = await client.get(f"/sessions/{session_id}")
-        if response.status_code != 200:
+        if response.status_code != status.HTTP_200_OK:
             raise HTTPException(status_code=response.status_code, detail="Error fetching session")
         session = response.json()
         session = format_session(session)
@@ -34,20 +48,36 @@ async def read_session(request: Request, session_id: int):
         film = response.json()
     return templates.TemplateResponse("session.html", {"request": request, "session": session, "film": film})
 
-
-@router.post("/create_session", response_class=RedirectResponse)
+@router.post("/create_session", response_class=RedirectResponse, summary="Create a new session", tags=["sessions"])
 async def create_session(
-        request: Request,
-        film_id: int = Form(...),
-        date: str = Form(...),
-        time: str = Form(...),
-        price: float = Form(...),
-        capacity: int = Form(...),
-        auto_booking: bool = Form(False),
+    request: Request,
+    film_id: int = Form(...),
+    date: str = Form(...),
+    time: str = Form(...),
+    price: float = Form(...),
+    capacity: int = Form(...),
+    auto_booking: bool = Form(False),
 ):
-    if not request["state"]["is_admin"]:
-        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
-    print(auto_booking)
+    """
+    Create a new session.
+
+    Args:
+        request (Request): The request object.
+        film_id (int): The ID of the film for the session.
+        date (str): The date of the session.
+        time (str): The time of the session.
+        price (float): The price of the session.
+        capacity (int): The capacity of the session.
+        auto_booking (bool): Whether auto booking is enabled.
+
+    Returns:
+        RedirectResponse: Redirects to the film's page on success.
+
+    Raises:
+        HTTPException: If the user is not authorized or an error occurs while creating the session.
+    """
+    if not request.state.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
 
     datetime_str = f"{date}T{time}:00.000Z"
 
@@ -63,53 +93,84 @@ async def create_session(
     headers = {"Authorization": token}
     async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
         response = await client.post("/sessions/", json=new_session.dict())
-        if response.status_code != 200:
+        if response.status_code != status.HTTP_201_CREATED:
             raise HTTPException(status_code=response.status_code, detail="Error adding session")
 
-    return RedirectResponse(url=f"/films/{film_id}", status_code=303)
+    return RedirectResponse(url=f"/films/{film_id}", status_code=status.HTTP_303_SEE_OTHER)
 
-
-@router.post("/{session_id}/status/{new_status}")
+@router.post("/{session_id}/status/{new_status}", response_class=RedirectResponse, summary="Change session status", tags=["sessions"])
 async def change_session_status(request: Request, session_id: int, new_status: str):
+    """
+    Change the status of a session.
+
+    Args:
+        request (Request): The request object.
+        session_id (int): The ID of the session.
+        new_status (str): The new status to set for the session.
+
+    Returns:
+        RedirectResponse: Redirects to the film's page on success.
+
+    Raises:
+        HTTPException: If the user is not authorized or an error occurs while changing the session status.
+    """
     if not request.state.is_admin:
-        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
 
     token = request.cookies.get("access_token")
     headers = {"Authorization": token}
     async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
         response = await client.post(f"/sessions/{session_id}/status/{new_status}")
-        if response.status_code != 200:
+        if response.status_code != status.HTTP_200_OK:
             raise HTTPException(status_code=response.status_code, detail="Error changing status of session")
         session = response.json()
-        print(session)
 
-    return RedirectResponse(url=f"/films/{session['film_id']}", status_code=303)
+    return RedirectResponse(url=f"/films/{session['film_id']}", status_code=status.HTTP_303_SEE_OTHER)
 
-
-@router.post("/change_session_price")
+@router.post("/change_session_price", response_class=RedirectResponse, summary="Change session price", tags=["sessions"])
 async def change_session_price(request: Request,
                                session_id: int = Form(...),
                                new_price: float = Form(...)):
+    """
+    Change the price of a session.
+
+    Args:
+        request (Request): The request object.
+        session_id (int): The ID of the session.
+        new_price (float): The new price to set for the session.
+
+    Returns:
+        RedirectResponse: Redirects to the session's page on success.
+
+    Raises:
+        HTTPException: If the user is not authorized or an error occurs while changing the session price.
+    """
     if not request.state.is_admin:
-        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
 
     token = request.cookies.get("access_token")
     headers = {"Authorization": token}
     async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
         response = await client.post(f"/sessions/{session_id}/price/{new_price}")
-        if response.status_code != 200:
+        if response.status_code != status.HTTP_200_OK:
             raise HTTPException(status_code=response.status_code, detail="Error changing status of session")
         session = response.json()
 
-    return RedirectResponse(url=f"/sessions/{session['id']}", status_code=303)
-
+    return RedirectResponse(url=f"/sessions/{session['id']}", status_code=status.HTTP_303_SEE_OTHER)
 
 def format_session(session):
+    """
+    Format session details.
+
+    Args:
+        session (dict): The session data.
+
+    Returns:
+        dict: The formatted session data.
+    """
     dt_object = datetime.fromisoformat(session["datetime"])
     session["datetime"] = dt_object.strftime("%B %d, %Y %H:%M:%S")
     session["reserved_seats"] = len([seat for seat in session["seats"] if seat["status"] == "reserved"])
-    i = 1
-    for seat in session["seats"]:
+    for i, seat in enumerate(session["seats"], start=1):
         seat["number"] = i
-        i += 1
     return session

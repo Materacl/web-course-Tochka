@@ -1,14 +1,13 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Float, Enum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from .database import Base
 from enum import Enum as PyEnum
 
-
+# Define enum classes for various statuses
 class FilmStatus(str, PyEnum):
     AVAILABLE = "available"
     NOT_AVAILABLE = "not_available"
-
 
 class SessionStatus(str, PyEnum):
     UPCOMING = "upcoming"
@@ -16,25 +15,22 @@ class SessionStatus(str, PyEnum):
     COMPLETED = "completed"
     CANCELED = "canceled"
 
-
 class BookingStatus(str, PyEnum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
     CANCELED = "canceled"
-
 
 class ReservationStatus(str, PyEnum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
     CANCELED = "canceled"
 
-
 class SeatStatus(str, PyEnum):
     AVAILABLE = "available"
     RESERVED = "reserved"
     CANCELED = "canceled"
 
-
+# Define the User model
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -46,41 +42,53 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     bookings = relationship("Booking", back_populates="user", cascade="all, delete-orphan")
 
+    def __repr__(self):
+        return f"<User(id={self.id}, email={self.email}, nickname={self.nickname})>"
 
+# Define the Film model
 class Film(Base):
     __tablename__ = "films"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     description = Column(String)
-    duration = Column(Integer)
+    duration = Column(Integer)  # Duration in minutes
     image_url = Column(String, nullable=True)
     status = Column(Enum(FilmStatus), default=FilmStatus.AVAILABLE)
     sessions = relationship("Session", back_populates="film", cascade="all, delete-orphan")
 
+    def __repr__(self):
+        return f"<Film(id={self.id}, title={self.title}, status={self.status})>"
 
+# Define the Session model
 class Session(Base):
     __tablename__ = "sessions"
     id = Column(Integer, primary_key=True, index=True)
     film_id = Column(Integer, ForeignKey("films.id", ondelete="CASCADE"))
     datetime = Column(DateTime, index=True)
     price = Column(Float)
-    capacity = Column(Integer)
+    capacity = Column(Integer)  # Number of available seats
     auto_booking = Column(Boolean, default=False)
     status = Column(Enum(SessionStatus), default=SessionStatus.UPCOMING)
     film = relationship("Film", back_populates="sessions")
     bookings = relationship("Booking", back_populates="session", cascade="all, delete-orphan")
     seats = relationship("Seat", back_populates="session", cascade="all, delete-orphan")
 
+    def __repr__(self):
+        return f"<Session(id={self.id}, film_id={self.film_id}, datetime={self.datetime})>"
 
+# Define the Seat model
 class Seat(Base):
     __tablename__ = "seats"
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(Integer, ForeignKey("sessions.id", ondelete="CASCADE"))
     reservation_id = Column(Integer, ForeignKey("reservations.id", ondelete="SET NULL"))
-    status = Column(Enum(SeatStatus), default=FilmStatus.AVAILABLE)
+    status = Column(Enum(SeatStatus), default=SeatStatus.AVAILABLE)
     session = relationship("Session", back_populates="seats")
 
+    def __repr__(self):
+        return f"<Seat(id={self.id}, session_id={self.session_id}, status={self.status})>"
 
+# Define the Booking model
 class Booking(Base):
     __tablename__ = "bookings"
     id = Column(Integer, primary_key=True, index=True)
@@ -91,12 +99,19 @@ class Booking(Base):
     user = relationship("User", back_populates="bookings")
     reservations = relationship("Reservation", back_populates="booking", cascade="all, delete-orphan")
 
+    def __repr__(self):
+        return f"<Booking(id={self.id}, session_id={self.session_id}, user_id={self.user_id})>"
 
+# Define the Reservation model
 class Reservation(Base):
     __tablename__ = "reservations"
     id = Column(Integer, primary_key=True, index=True)
     booking_id = Column(Integer, ForeignKey("bookings.id", ondelete="CASCADE"))
     seat_id = Column(Integer, ForeignKey("seats.id", ondelete="SET NULL"))
     status = Column(Enum(ReservationStatus), default=ReservationStatus.PENDING)
-    deadline = Column(DateTime, default=datetime.utcnow)
+    deadline = Column(DateTime, default=datetime.now(timezone.utc))
     booking = relationship("Booking", back_populates="reservations")
+
+    def __repr__(self):
+        return f"<Reservation(id={self.id}, booking_id={self.booking_id}, seat_id={self.seat_id})>"
+    
