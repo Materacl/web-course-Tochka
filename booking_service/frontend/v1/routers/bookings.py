@@ -50,7 +50,7 @@ async def create_booking(
 
     token = request.cookies.get("access_token")
     headers = {"Authorization": token}
-    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
+    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers, timeout=30.0) as client:
         response = await client.post("/bookings/", json={"session_id": session_id})
         if response.status_code != status.HTTP_201_CREATED:
             logger.error("Failed to create booking for session_id: %s", session_id)
@@ -118,7 +118,7 @@ async def change_booking_status(request: Request, booking_id: int, new_status: s
 
     token = request.cookies.get("access_token")
     headers = {"Authorization": token}
-    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
+    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers, timeout=30.0) as client:
         if request.state.is_admin:
             response = await client.post(f"/bookings/{booking_id}/{new_status}")
             if response.status_code != status.HTTP_200_OK:
