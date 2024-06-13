@@ -57,7 +57,7 @@ async def subscribe(
     """
     try:
         update_user_notifications(db, current_user.id, True)
-        publish_message('email_notifications', f"subscribe:{current_user.email}")
+        await publish_message('email_notifications', f"subscribe:{current_user.email}")
         return {"message": "Subscription successful"}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -107,7 +107,7 @@ async def unsubscribe(
     """
     try:
         update_user_notifications(db, current_user.id, False)
-        publish_message('email_notifications', f"unsubscribe:{current_user.email}")
+        await publish_message('email_notifications', f"unsubscribe:{current_user.email}")
         return {"message": "Unsubscribe successful"}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

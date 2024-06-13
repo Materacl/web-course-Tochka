@@ -1,7 +1,9 @@
 import os
 import json
 import time
-import pika
+import logging
+import asyncio
+import aio_pika
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
 # Fetch environment variables
@@ -12,6 +14,10 @@ MAIL_FROM = os.getenv("MAIL_FROM")
 MAIL_PORT = int(os.getenv("MAIL_PORT"))
 MAIL_SERVER = os.getenv("MAIL_SERVER")
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Configuration for FastMail
 conf = ConnectionConfig(
     MAIL_USERNAME=MAIL_USERNAME,
@@ -21,31 +27,51 @@ conf = ConnectionConfig(
     MAIL_SERVER=MAIL_SERVER
 )
 
-def callback(ch, method, properties, body):
-    message = json.loads(body)
-    message_schema = MessageSchema(
-        subject=message["subject"],
-        recipients=message["recipients"],
-        body=message["body"],
-        subtype=message["subtype"]
-    )
+async def send_email(message):
     fm = FastMail(conf)
-    fm.send_message(message_schema)
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+    await fm.send_message(message)
+    logger.info(f"Email sent to {message.recipients}")
 
-def start_worker():
+async def callback(message: aio_pika.IncomingMessage):
+    async with message.process():
+        try:
+            raw_message = message.body.decode()
+            logger.info(f"Received raw message: {raw_message}")
+            message_body = json.loads(raw_message)
+            message_schema = MessageSchema(
+                subject=message_body["subject"],
+                recipients=message_body["recipients"],
+                body=message_body["body"],
+                subtype=message_body["subtype"]
+            )
+            await send_email(message_schema)
+            logger.info(f"Processed message: {message_body}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to decode message: {e}")
+        except Exception as e:
+            logger.error(f"Failed to process message: {e}")
+
+async def main():
     while True:
         try:
-            connection = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URL))
-            channel = connection.channel()
-            channel.queue_declare(queue='email')
+            connection = await aio_pika.connect_robust(RABBITMQ_URL)
+            async with connection:
+                channel = await connection.channel()
+                await channel.set_qos(prefetch_count=1)
+                queue = await channel.declare_queue('booking_notifications', durable=True)
+                await queue.consume(callback)
 
-            channel.basic_consume(queue='email', on_message_callback=callback, auto_ack=True)
-            print('Waiting for messages. To exit press CTRL+C')
-            channel.start_consuming()
-        except pika.exceptions.AMQPConnectionError as e:
-            print(f"Connection to RabbitMQ failed, retrying in 5 seconds... Error: {e}")
-            time.sleep(5)
+                logger.info("Waiting for messages. To exit press CTRL+C")
+                await asyncio.Future()  # Run forever
+        except aio_pika.exceptions.AMQPConnectionError as e:
+            logger.error(f"Connection to RabbitMQ failed, retrying in 5 seconds... Error: {e}")
+            await asyncio.sleep(5)
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            await asyncio.sleep(5)
 
 if __name__ == "__main__":
-    start_worker()
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Worker shut down gracefully.")
