@@ -14,6 +14,7 @@ from v1.config import settings
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def create_app():
     """
     Create and configure an instance of the FastAPI application.
@@ -57,9 +58,6 @@ def create_app():
 
     return app
 
+
 # Create an instance of the FastAPI application
 app = create_app()
-
-if __name__ == "__main__":
-    # Run the FastAPI application using uvicorn when executing the script directly
-    uvicorn.run(app, host="0.0.0.0", port=8001, env_file=".env")

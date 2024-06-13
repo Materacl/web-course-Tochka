@@ -58,5 +58,18 @@ services:
     depends_on:
       - rabbitmq
 
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - /etc/ssl/certs:/etc/ssl/certs
+      - /etc/ssl/private:/etc/ssl/private
+    depends_on:
+      - frontend
+
 volumes:
   postgres_data:
