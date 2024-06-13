@@ -156,6 +156,7 @@ async def add_film(
         # Save the file
         with file_location.open("wb+") as file_object:
             shutil.copyfileobj(image.file, file_object)
+        logger.info(f"Image {image.filename} saved to {file_location}")
 
     logger.info(f"Successfully added film: {title}")
     return RedirectResponse(url="/films/1/12", status_code=status.HTTP_303_SEE_OTHER)
