@@ -37,7 +37,7 @@
                     </div>
                     <div class="film-card-body">
                         {% if film.image_url %}
-                            <img src="{{ url_for('static', path=film.image_url) }}" alt="{{ film.title }}" width="300px" height="450px">
+                            <img src="/static/{{film.image_url}}" alt="{{ film.title }}" width="300px" height="450px">
                         {% else %}
                             <div class="placeholder">🎥 Film Image</div>
                         {% endif %}

@@ -148,6 +148,9 @@ async def add_film(
             logger.error(f"Failed to upload image for film: {response.status_code}")
             raise HTTPException(status_code=response.status_code, detail="Error adding image to film")
         
+        # Reset the file pointer to the beginning
+        image.file.seek(0)
+        
         # Create the directory if it doesn't exist
         file_location = f"images/films/{film_id}_{image.filename}"
         file_location = STATIC_DIR / file_location
