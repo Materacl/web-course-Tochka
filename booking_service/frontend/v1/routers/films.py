@@ -23,7 +23,7 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory="v1/templates")
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = BASE_DIR / "static"
 
 @router.get("/{page}/{limit}", response_class=HTMLResponse, summary="Get films list", tags=["films"])
