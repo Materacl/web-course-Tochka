@@ -30,11 +30,6 @@ def create_app():
         name="static",
     )
 
-    @app.on_event("startup")
-    async def startup_event():
-        # Ensure FastAPI generates URLs with HTTPS
-        app.root_path = "https://homecinemavr.3005537-hf76571.twc1.net"
-
     # Add CORS middleware
     app.add_middleware(
         CORSMiddleware,
