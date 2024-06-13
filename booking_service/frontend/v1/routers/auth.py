@@ -82,7 +82,7 @@ async def post_login(request: Request, email: str = Form(...), password: str = F
     if response.status_code == 200:
         token = response.json()["access_token"]
         redirect_response = RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-        redirect_response.set_cookie(key="access_token", value=f"Bearer {token}", httponly=True, secure=True)
+        redirect_response.set_cookie(key="access_token", value=f"Bearer {token}", httponly=True, secure=False)
         return redirect_response
     return templates.TemplateResponse("login.html", {"request": request, "error": "Login failed"})
 
