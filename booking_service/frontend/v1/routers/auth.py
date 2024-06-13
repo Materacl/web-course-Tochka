@@ -1,9 +1,14 @@
+import logging
 from fastapi import APIRouter, Request, Form, Response, Depends
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from starlette.status import HTTP_302_FOUND
 import httpx
 from ..config import settings
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/auth",
@@ -25,6 +30,7 @@ async def get_register(request: Request):
     Returns:
         HTMLResponse: The rendered registration page.
     """
+    logger.info("Rendering the registration page")
     return templates.TemplateResponse("register.html", {"request": request})
 
 
@@ -42,10 +48,13 @@ async def post_register(request: Request, email: str = Form(...), password: str 
         RedirectResponse: Redirects to the login page on success.
         HTMLResponse: Renders the registration page with an error message on failure.
     """
+    logger.info("Received registration request for email: %s", email)
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
         response = await client.post("/auth/register", json={"email": email, "password": password})
     if response.status_code == 201:
+        logger.info("User registered successfully with email: %s", email)
         return RedirectResponse(url="/auth/login", status_code=HTTP_302_FOUND)
+    logger.error("Registration failed for email: %s", email)
     return templates.TemplateResponse("register.html", {"request": request, "error": "Registration failed"})
 
 
@@ -60,6 +69,7 @@ async def get_login(request: Request):
     Returns:
         HTMLResponse: The rendered login page.
     """
+    logger.info("Rendering the login page")
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -77,13 +87,16 @@ async def post_login(request: Request, email: str = Form(...), password: str = F
         RedirectResponse: Redirects to the home page on success with a set cookie.
         HTMLResponse: Renders the login page with an error message on failure.
     """
+    logger.info("Received login request for email: %s", email)
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
         response = await client.post("/auth/token", data={"username": email, "password": password})
     if response.status_code == 200:
         token = response.json()["access_token"]
+        logger.info("User logged in successfully with email: %s", email)
         redirect_response = RedirectResponse(url="/", status_code=HTTP_302_FOUND)
         redirect_response.set_cookie(key="access_token", value=f"Bearer {token}", httponly=True, secure=False)
         return redirect_response
+    logger.error("Login failed for email: %s", email)
     return templates.TemplateResponse("login.html", {"request": request, "error": "Login failed"})
 
 
@@ -98,6 +111,7 @@ async def logout(request: Request):
     Returns:
         RedirectResponse: Redirects to the home page and clears the access token cookie.
     """
+    logger.info("User logged out")
     response = RedirectResponse(url="/")
     response.delete_cookie("access_token")
     return response

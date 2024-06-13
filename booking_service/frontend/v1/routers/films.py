@@ -1,6 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 import shutil
+import logging
 
 from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File, status
 from fastapi.templating import Jinja2Templates
@@ -9,6 +10,10 @@ from pydantic import BaseModel
 
 from ..config import settings
 import httpx
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/films",
@@ -34,10 +39,12 @@ async def read_films(request: Request, page: int = 1, limit: int = 12):
     Returns:
         TemplateResponse: The films list page.
     """
+    logger.info(f"Fetching films for page {page} with limit {limit}")
     skip = (page - 1) * limit
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
         response = await client.get("/films/", params={"skip": skip, "limit": limit})
         if response.status_code != status.HTTP_200_OK:
+            logger.error(f"Failed to fetch films: {response.status_code}")
             films = []
             total_films = 0
         else:
@@ -66,9 +73,11 @@ async def read_film(request: Request, film_id: int):
     Returns:
         TemplateResponse: The film details page.
     """
+    logger.info(f"Fetching details for film_id {film_id}")
     async with httpx.AsyncClient(base_url=settings.API_URL) as client:
         response = await client.get(f"/films/{film_id}")
         if response.status_code != status.HTTP_200_OK:
+            logger.error(f"Failed to fetch film details: {response.status_code}")
             film = None
         else:
             film = response.json()
@@ -112,7 +121,9 @@ async def add_film(
     Raises:
         HTTPException: If the user is not authorized or an error occurs.
     """
+    logger.info(f"Attempting to add a new film: {title}")
     if not request.state.is_admin:
+        logger.warning("Unauthorized add film attempt")
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
 
     new_film = FilmCreate(
@@ -127,12 +138,14 @@ async def add_film(
     async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
         response = await client.post("/films/", json=new_film.dict())
         if response.status_code != status.HTTP_201_CREATED:
+            logger.error(f"Failed to add film: {response.status_code}")
             raise HTTPException(status_code=response.status_code, detail="Error adding film")
 
         film_id = response.json()["id"]
         files = {"file": (image.filename, image.file, image.content_type)}
         response = await client.post(f"/films/{film_id}/upload_image", files=files)
         if response.status_code != status.HTTP_200_OK:
+            logger.error(f"Failed to upload image for film: {response.status_code}")
             raise HTTPException(status_code=response.status_code, detail="Error adding image to film")
         
         # Create the directory if it doesn't exist
@@ -144,6 +157,7 @@ async def add_film(
         with file_location.open("wb+") as file_object:
             shutil.copyfileobj(image.file, file_object)
 
+    logger.info(f"Successfully added film: {title}")
     return RedirectResponse(url="/films/1/12", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -167,7 +181,9 @@ async def update_film_status(
     Raises:
         HTTPException: If the user is not authorized or an error occurs.
     """
+    logger.info(f"Attempting to update status of film_id {film_id} to {new_status}")
     if not request.state.is_admin:
+        logger.warning("Unauthorized status update attempt")
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
 
     token = request.cookies.get("access_token")
@@ -175,7 +191,10 @@ async def update_film_status(
     async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
         response = await client.post(f"/films/{film_id}/status/{new_status}")
         if response.status_code != status.HTTP_200_OK:
+            logger.error(f"Failed to update status for film_id {film_id}: {response.status_code}")
             raise HTTPException(status_code=response.status_code, detail="Error changing film status")
+
+    logger.info(f"Successfully updated status of film_id {film_id} to {new_status}")
     return RedirectResponse(url="/films/1/12", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -189,6 +208,7 @@ def format_sessions(film):
     Returns:
         dict: The film data with formatted session details.
     """
+    logger.info(f"Formatting sessions for film_id {film.get('id')}")
     for session in film.get("sessions", []):
         dt_object = datetime.fromisoformat(session["datetime"])
         session["datetime"] = dt_object.strftime("%B %d, %Y %H:%M:%S")
