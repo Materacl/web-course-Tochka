@@ -12,8 +12,8 @@ from ..crud.films import get_films, get_film, create_film, delete_film, update_f
 from ..utils.auth import get_current_active_admin
 
 # Define the base directory
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-STATIC_DIR = BASE_DIR / "frontend" / "v1" / "static"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+STATIC_DIR = BASE_DIR / "static"
 
 router = APIRouter(
     prefix="/films",

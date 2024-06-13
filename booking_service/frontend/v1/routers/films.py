@@ -1,4 +1,6 @@
 from datetime import datetime
+from pathlib import Path
+import shutil
 
 from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File, status
 from fastapi.templating import Jinja2Templates
@@ -16,6 +18,8 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory="v1/templates")
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+STATIC_DIR = BASE_DIR / "static"
 
 @router.get("/{page}/{limit}", response_class=HTMLResponse, summary="Get films list", tags=["films"])
 async def read_films(request: Request, page: int = 1, limit: int = 12):
@@ -130,6 +134,15 @@ async def add_film(
         response = await client.post(f"/films/{film_id}/upload_image", files=files)
         if response.status_code != status.HTTP_200_OK:
             raise HTTPException(status_code=response.status_code, detail="Error adding image to film")
+        
+        # Create the directory if it doesn't exist
+        file_location = f"images/films/{film_id}_{image.filename}"
+        file_location = STATIC_DIR / file_location
+        file_location.parent.mkdir(parents=True, exist_ok=True)
+
+        # Save the file
+        with file_location.open("wb+") as file_object:
+            shutil.copyfileobj(image.file, file_object)
 
     return RedirectResponse(url="/films/1/12", status_code=status.HTTP_303_SEE_OTHER)
 
