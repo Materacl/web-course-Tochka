@@ -1122,3 +1122,30 @@ form p.error {
 .nickname-form-container button[type="button"]:hover {
     background-color: #999;
 }
+
+/* Subscription button styles */
+.subscription-container {
+    margin-top: 20px;
+}
+
+.subscription-button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.subscription-button:hover {
+    background-color: #218838;
+}
+
+.subscription-button.unsubscribe {
+    background-color: #dc3545;
+}
+
+.subscription-button.unsubscribe:hover {
+    background-color: #c82333;
+}

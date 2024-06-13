@@ -77,11 +77,11 @@ async def subscribe(request: Request):
     
     token = request.cookies.get("access_token")
     headers = {"Authorization": token}
-    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
+    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers, timeout=30.0) as client:
         response = await client.post("/email/subscribe/", headers=headers)
         if response.status_code != status.HTTP_200_OK:
             raise HTTPException(status_code=response.status_code, detail="Error subscribing to notifications")
-    return RedirectResponse(url="/profile", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/auth/logout", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/unsubscribe/", response_class=RedirectResponse, summary="Unsubscribe from notifications", tags=["profile"])
 async def unsubscribe(request: Request):
@@ -102,8 +102,8 @@ async def unsubscribe(request: Request):
     
     token = request.cookies.get("access_token")
     headers = {"Authorization": token}
-    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
+    async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers, timeout=30.0) as client:
         response = await client.post("/email/unsubscribe/", headers=headers)
         if response.status_code != status.HTTP_200_OK:
             raise HTTPException(status_code=response.status_code, detail="Error unsubscribing from notifications")
-    return RedirectResponse(url="/profile", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/auth/logout", status_code=status.HTTP_303_SEE_OTHER)

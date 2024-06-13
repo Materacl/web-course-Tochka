@@ -12,7 +12,7 @@ class Settings(BaseSettings):
         ACCESS_TOKEN_EXPIRE_MINUTES (int): Expiry time for access tokens in minutes.
         DATABASE_URL (str): URL of the database.
         CORS_ORIGINS (str): Comma-separated list of allowed CORS origins.
-        MQ_URL (str): URL for the message queue.
+        RABBITMQ_URL (str): URL for the message queue.
         MAIL_USERNAME (str): Username for the mail server.
         MAIL_PASSWORD (str): Password for the mail server.
         MAIL_FROM (str): Email address from which emails are sent.
@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = os.getenv("CORS_ORIGINS")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
     DATABASE_URL: str = os.getenv("DATABASE_URL")
-    MQ_URL: str = os.getenv("MQ_URL")
+    RABBITMQ_URL: str = os.getenv("RABBITMQ_URL")
     MAIL_USERNAME: str = os.getenv("MAIL_USERNAME")
     MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD")
     MAIL_FROM: str = os.getenv("MAIL_FROM")

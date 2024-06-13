@@ -11,6 +11,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - rabbitmq
+      - worker
 
   frontend:
     build:
@@ -38,6 +40,23 @@ services:
       - ./api/.env.test
     depends_on:
       - db
+      - rabbitmq
+      - worker
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    env_file:
+      - ./api/.env.docker
+    depends_on:
+      - rabbitmq
 
 volumes:
   postgres_data:
