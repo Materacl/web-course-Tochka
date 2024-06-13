@@ -193,6 +193,7 @@ def format_session(session):
     dt_object = datetime.fromisoformat(session["datetime"])
     session["datetime"] = dt_object.strftime("%B %d, %Y %H:%M:%S")
     session["reserved_seats"] = len([seat for seat in session["seats"] if seat["status"] == "reserved"])
+    session["seats"] = sorted(session["seats"], key=lambda seat: seat["id"])
     for i, seat in enumerate(session["seats"], start=1):
         seat["number"] = i
     return session

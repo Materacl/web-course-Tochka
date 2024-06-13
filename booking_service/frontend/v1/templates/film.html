@@ -8,7 +8,7 @@
     <div class="film-detail">
         {% if film.image_url %}
             <div class="film-image">
-                <img src="{{ url_for('static', path=film.image_url) }}" alt="{{ film.title }}">
+                <img src="/static/{{film.image_url}}" alt="{{ film.title }}" width="300px" height="450px">
             </div>
         {% else %}
             <div class="placeholder">🎥 Film Image</div>
