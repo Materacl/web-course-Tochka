@@ -166,3 +166,7 @@ booking_service/frontend/v1/static/images/films/*
 
 *.db
 *.DS_Store
+
+*.key
+*.crt
+*.pem
