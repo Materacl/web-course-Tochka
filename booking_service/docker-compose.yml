@@ -67,6 +67,7 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt
+      - ./nginx/certs:/etc/nginx/certs
     depends_on:
       - frontend
 
