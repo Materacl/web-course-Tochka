@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 import logging
 
 import uvicorn
@@ -31,6 +33,18 @@ def create_app():
         StaticFiles(directory="v1/static"),
         name="static",
     )
+
+    # Ensure all requests are redirected to HTTPS
+    app.add_middleware(HTTPSRedirectMiddleware)
+
+    # Optionally, add TrustedHostMiddleware if you want to restrict host headers
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["homecinemavr.3005537-hf76571.twc1.net",
+                                                             "*.homecinemavr.3005537-hf76571.twc1.net"])
+
+    @app.on_event("startup")
+    async def startup_event():
+        # Ensure FastAPI generates URLs with HTTPS
+        app.root_path = "https://homecinemavr.3005537-hf76571.twc1.net"
 
     # Add CORS middleware
     app.add_middleware(

@@ -1,8 +1,6 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from v1 import router as api_v1_router
 from v1.utils.scheduler import scheduler
 from v1.config import settings
@@ -10,6 +8,7 @@ from v1.config import settings
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
 
 def create_app() -> FastAPI:
     """
@@ -22,13 +21,6 @@ def create_app() -> FastAPI:
 
     # List of allowed origins for CORS. This can be configured via environment variables.
     origins = settings.CORS_ORIGINS.split(",")  # assuming CORS_ORIGINS is a comma-separated string
-
-    # Ensure all requests are redirected to HTTPS
-    app.add_middleware(HTTPSRedirectMiddleware)
-
-    # Optionally, add TrustedHostMiddleware if you want to restrict host headers
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["homecinemavr.3005537-hf76571.twc1.net",
-                                                             "*.homecinemavr.3005537-hf76571.twc1.net"])
 
     # Add CORS middleware to the FastAPI app to handle cross-origin requests.
     app.add_middleware(
@@ -48,7 +40,6 @@ def create_app() -> FastAPI:
         Event handler that runs on application startup. 
         Starts the scheduler if it's not already running.
         """
-        app.root_path = "https://homecinemavr.3005537-hf76571.twc1.net"
         if not scheduler.running:
             scheduler.start()
         logger.info("Scheduler started")
@@ -64,6 +55,7 @@ def create_app() -> FastAPI:
         logger.info("Scheduler stopped")
 
     return app
+
 
 # Create an instance of the FastAPI application
 app = create_app()
