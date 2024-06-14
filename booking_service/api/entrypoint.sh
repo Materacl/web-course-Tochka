@@ -4,4 +4,4 @@
 alembic upgrade head
 
 # Start the FastAPI application with Uvicorn
-exec uvicorn main:app --host 0.0.0.0 --port 8000
+exec uvicorn main:app --proxy-headers --host 0.0.0.0 --port 8000
