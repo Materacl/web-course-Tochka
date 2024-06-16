@@ -1,6 +1,7 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from v1 import router as api_v1_router
 from v1.utils.scheduler import scheduler
 from v1.config import settings
@@ -57,6 +58,13 @@ def create_app() -> FastAPI:
         if scheduler.running:
             scheduler.shutdown()
         logger.info("Scheduler stopped")
+
+    @app.get("/")
+    async def read_root():
+        """
+        Root endpoint that redirects to the API documentation.
+        """
+        return RedirectResponse(url="/docs")
 
     return app
 

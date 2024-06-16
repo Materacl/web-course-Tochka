@@ -16,10 +16,3 @@ router.include_router(sessions.router)
 router.include_router(booking.router)
 router.include_router(reservations.router)
 router.include_router(email.router)
-
-@router.get("/")
-def read_root():
-    """
-    Root endpoint that redirects to the API documentation.
-    """
-    return RedirectResponse(url="/docs")

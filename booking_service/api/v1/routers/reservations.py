@@ -74,7 +74,7 @@ async def set_reservation_status(
     """
     return update_reservation_status(db, reservation_id, new_status)
 
-@router.delete("/{reservation_id}/cancel", response_model=Reservation, status_code=status.HTTP_200_OK, summary="Cancel user reservation", tags=["reservations"])
+@router.post("/{reservation_id}/cancel", response_model=Reservation, status_code=status.HTTP_200_OK, summary="Cancel user reservation", tags=["reservations"])
 async def cancel_user_reservation(
     reservation_id: int,
     db: Session = Depends(get_db),
