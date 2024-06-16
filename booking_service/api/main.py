@@ -20,9 +20,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="HomCinemaVR API",
         description="API documentation for HomeCinemaVR",
-        version="1.0.0",
-        docs_url="/api/docs", 
-        redoc_url="/api/redoc"
+        version="1.0.0"
         )
 
     # List of allowed origins for CORS. This can be configured via environment variables.
