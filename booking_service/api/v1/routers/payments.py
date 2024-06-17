@@ -122,7 +122,8 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         logger.info(f"Checkout Session was successful: {session['id']}")
 
         # Update payment status in the database
-        payment_id =  session['id']
+        booking_id = session["metadata"]["booking_id"]
+        payment_id = get_booking(db, booking_id).payment_id
         if payment_id:
             db_payment = update_payment_status(db, payment_id, PaymentStatus.COMPLETED)
             if db_payment:
