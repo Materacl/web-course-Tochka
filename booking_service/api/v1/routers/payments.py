@@ -37,7 +37,7 @@ async def create_payment_intent(
         current_user: User = Depends(get_current_active_user)
 ) -> dict:
     """
-    Create a Stripe Payment Intent.
+    Create a Stripe Checkout Session.
 
     Args:
         payment (PaymentCreate): The payment creation data.
@@ -45,7 +45,7 @@ async def create_payment_intent(
         current_user (User): The current active user.
 
     Returns:
-        Any: The created Stripe Payment Intent.
+        Any: The created Stripe Checkout Session URL.
     """
     try:
         db_booking = get_booking(db, payment.booking_id)
@@ -59,21 +59,34 @@ async def create_payment_intent(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="Session for this payment is not found.")
         amount = int(db_session.price * len(db_booking.reservations) * 100)
-        # Create a PaymentIntent with the order amount and currency
-        intent = stripe.PaymentIntent.create(
-            amount=amount,  # Stripe expects the amount in cents
-            currency="usd",
-            metadata={"integration_check": "accept_a_payment"},
+
+        # Create a Checkout Session
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': f"Booking {payment.booking_id}",
+                    },
+                    'unit_amount': amount,  # Stripe expects the amount in cents
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=f"{os.getenv('FRONTEND_URL')}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{os.getenv('FRONTEND_URL')}/payment-cancel?session_id={{CHECKOUT_SESSION_ID}}",
+            metadata={"booking_id": payment.booking_id}
         )
 
         # Save the Payment information in the database
         db_payment = create_payment(db, payment, amount)
-        logger.info(f"PaymentIntent created: {intent['id']} for Booking ID: {payment.booking_id}")
+        logger.info(f"Checkout Session created: {session['id']} for Booking ID: {db_payment.booking_id}")
 
-        return {"client_secret": intent['client_secret']}
+        return {"checkout_url": session.url}
     except Exception as e:
-        logger.error(f"Error creating PaymentIntent: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error creating PaymentIntent")
+        logger.error(f"Error creating Checkout Session: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error creating Checkout Session")
 
 
 @router.post("/webhook", status_code=status.HTTP_200_OK, summary="Handle Stripe Webhook")
@@ -104,13 +117,12 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         logger.error(f"Invalid signature: {e}")
         return JSONResponse({"error": "Invalid signature"}, status_code=400)
 
-    # Handle the event
-    if event['type'] == 'payment_intent.succeeded':
-        payment_intent = event['data']['object']
-        logger.info(f"PaymentIntent was successful: {payment_intent['id']}")
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        logger.info(f"Checkout Session was successful: {session['id']}")
 
         # Update payment status in the database
-        payment_id = payment_intent['metadata'].get('payment_id')
+        payment_id =  session['id']
         if payment_id:
             db_payment = update_payment_status(db, payment_id, PaymentStatus.COMPLETED)
             if db_payment:
@@ -118,4 +130,4 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             else:
                 logger.error(f"Payment not found for payment ID: {payment_id}")
 
-    return {"status": "success"}
+    return JSONResponse({"status": "success"})

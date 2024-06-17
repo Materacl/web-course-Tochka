@@ -34,8 +34,9 @@
             </div>
         {% endfor %}
     </div>
-    <button id="booking-submit" type="submit" class="btn btn-primary disabled">Confirm Booking</button>
+    <button id="booking-submit" type="submit" class="btn btn-primary disabled" >Confirm Booking</button>
 </form>
+
 
 {% if request.state.email %}
 <h2>My bookings</h2>
@@ -52,11 +53,12 @@
                     <p><strong>Status:</strong> {{ booking.status }}</p>
                 </div>
                 {% if booking.status == "confirmed" %}
-                <form action="{{ url_for('show_payment_page', booking_id=booking.id) }}" method="get">
+                <form action="{{ url_for('payment:pay_booking', booking_id=booking.id) }}" method="get">
                     <button type="submit" class="btn btn-primary">Pay</button>
                 </form>
                 {% endif %}
-                {% if booking.status != "canceled" %}
+                {% if booking.status == "canceled" %}
+                {% else %}
                 <form action="{{ url_for('change_booking_status', booking_id=booking.id, new_status='canceled') }}" method="post">
                     <button type="submit" class="btn btn-primary">Cancel</button>
                 </form>

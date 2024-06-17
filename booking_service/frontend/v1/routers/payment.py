@@ -1,10 +1,6 @@
-from datetime import datetime
-
-from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File, status
-from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-from fastapi.responses import RedirectResponse, HTMLResponse
 import logging
+from fastapi import APIRouter, Request, HTTPException, status
+from fastapi.responses import RedirectResponse
 import httpx
 
 from ..config import settings
@@ -19,41 +15,35 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-templates = Jinja2Templates(directory="v1/templates")
 
-
-@router.get("/{booking_id}/pay", response_class=HTMLResponse, summary="Show payment page")
-async def show_payment_page(request: Request, booking_id: int):
+@router.get("/{booking_id}/pay", summary="Redirect to Stripe Checkout", tags=["payment"])
+async def pay_booking(request: Request, booking_id: int):
     """
-    Show the payment page for a booking.
+    Redirect to Stripe Checkout for a specific booking.
 
     Args:
         request (Request): The request object.
         booking_id (int): The ID of the booking.
 
     Returns:
-        TemplateResponse: The payment page.
+        RedirectResponse: Redirects to the Stripe Checkout Session URL.
+
+    Raises:
+        HTTPException: If an error occurs while creating the Checkout Session.
     """
+    logger.info(f"Creating Checkout Session for booking_id: {booking_id}")
     try:
         token = request.cookies.get("access_token")
         headers = {"Authorization": token}
         async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
-            response = await client.post(f"/payments/create-payment-intent", json={"booking_id": booking_id})
+            response = await client.post("/payments/create-checkout-session", json={"booking_id": booking_id})
             if response.status_code != status.HTTP_201_CREATED:
-                logger.error(f"Failed to create payment for booking_id: {booking_id}")
-                raise HTTPException(status_code=response.status_code, detail="Error to create payment for booking")
-            intent = response.json()
-            if not intent:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
-
-        client_secret = intent['client_secret']
-        response = await client.get(f"/bookings/{booking_id}")
-        if response.status_code != status.HTTP_200_OK:
-            logger.error("Failed to fetch booking details for booking_id: %s", booking_id)
-            HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Error fetching booking for this payment")
-        db_booking = response.json()
-        return templates.TemplateResponse("payment.html", {"request": request, "client_secret": client_secret,
-                                                           "booking": db_booking})
+                logger.error(f"Error creating Checkout Session: {response.text}")
+                raise HTTPException(status_code=response.status_code, detail="Error creating Checkout Session")
+            checkout_url = response.json()["checkout_url"]
     except Exception as e:
-        logger.error(f"Error showing payment page: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error showing payment page")
+        logger.error(f"Error redirecting to Checkout Session: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="Error redirecting to Checkout Session")
+
+    return RedirectResponse(url=checkout_url)
