@@ -89,7 +89,7 @@ class Payment(BaseModel):
     """
     Schema for representing a payment.
     """
-    id: int
+    id: str
     booking_id: int
     amount: float
     status: PaymentStatus
