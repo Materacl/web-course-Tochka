@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 
 from sqlalchemy.orm import Session
@@ -29,9 +30,6 @@ def create_payment(db: Session, payment_data: PaymentCreate, amount: int) -> Pay
     db.commit()
     db.refresh(db_payment)
     return db_payment
-
-
-from datetime import datetime, timedelta, timezone
 
 
 def update_payment_status(db: Session, payment_id: str, new_status: Optional[PaymentStatus] = None) -> Payment:

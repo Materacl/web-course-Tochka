@@ -51,7 +51,7 @@ async def create_checkout_session(
         db_booking = get_booking(db, payment.booking_id)
         if db_booking.payments:
             for current_payment in db_booking.payments:
-                if current_payment.status in [PaymentStatus.PENDING, PaymentStatus.COMPLETED]:
+                if current_payment.status == PaymentStatus.COMPLETED:
                     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                         detail="Payment with this booking_id already exist.")
         db_session = get_session(db, db_booking.session_id)
