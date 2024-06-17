@@ -67,7 +67,7 @@ async def create_payment_intent(
         )
 
         # Save the Payment information in the database
-        db_payment = create_payment(db, payment, )
+        db_payment = create_payment(db, payment, amount)
         logger.info(f"PaymentIntent created: {intent['id']} for Booking ID: {payment.booking_id}")
 
         return {"client_secret": intent['client_secret']}

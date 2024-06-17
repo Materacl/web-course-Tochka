@@ -3,7 +3,7 @@ from ..models import Payment, PaymentStatus
 from ..schemas import PaymentCreate
 
 
-def create_payment(db: Session, payment_data: PaymentCreate) -> Payment:
+def create_payment(db: Session, payment_data: PaymentCreate, amount: int) -> Payment:
     """
     Create a new payment record in the database.
 
@@ -16,7 +16,7 @@ def create_payment(db: Session, payment_data: PaymentCreate) -> Payment:
     """
     db_payment = Payment(
         booking_id=payment_data.booking_id,
-        amount=payment_data.amount,
+        amount=amount,
         status=PaymentStatus.PENDING
     )
     db.add(db_payment)
