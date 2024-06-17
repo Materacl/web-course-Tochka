@@ -20,6 +20,7 @@ STATUS_ORDER = {
     SessionStatus.CANCELED: 4
 }
 
+
 def create_session(db: Session, session: SessionCreate) -> SessionModel:
     """
     Create a new session.
@@ -57,6 +58,7 @@ def create_session(db: Session, session: SessionCreate) -> SessionModel:
 
     return db_session
 
+
 def delete_session(db: Session, session_id: int) -> SessionModel:
     """
     Delete a session by its ID.
@@ -75,6 +77,7 @@ def delete_session(db: Session, session_id: int) -> SessionModel:
     db.commit()
     logger.info(f"Session with id {session_id} deleted")
     return db_session
+
 
 def handle_bookings_and_seats(db: Session, db_session: SessionModel, new_status: SessionStatus):
     """
@@ -97,6 +100,7 @@ def handle_bookings_and_seats(db: Session, db_session: SessionModel, new_status:
             update_booking_status(db, booking.id, BookingStatus.CANCELED)
         for seat in db_session.seats:
             update_seat_status(db, seat.id, SeatStatus.CANCELED)
+
 
 def update_session_status(db: Session, session_id: int, new_status: Optional[SessionStatus] = None) -> SessionModel:
     """
@@ -150,6 +154,7 @@ def update_session_status(db: Session, session_id: int, new_status: Optional[Ses
     logger.info(f"Status of session id {session_id} updated to {db_session.status}")
     return db_session
 
+
 def update_session_price(db: Session, session_id: int, new_price: float) -> SessionModel:
     """
     Update the price of a session.
@@ -170,6 +175,7 @@ def update_session_price(db: Session, session_id: int, new_price: float) -> Sess
     db.commit()
     logger.info(f"Price of session id {session_id} updated to {new_price}")
     return db_session
+
 
 def get_session(db: Session, session_id: int) -> SessionModel:
     """
@@ -192,6 +198,7 @@ def get_session(db: Session, session_id: int) -> SessionModel:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
     return db_session
 
+
 def get_sessions(db: Session, skip: Optional[int] = None, limit: Optional[int] = None,
                  film_id: Optional[int] = None, session_status: Optional[SessionStatus] = None) -> List[SessionModel]:
     """
@@ -207,7 +214,8 @@ def get_sessions(db: Session, skip: Optional[int] = None, limit: Optional[int] =
     Returns:
         List[SessionModel]: A list of sessions.
     """
-    logger.info(f"Retrieving sessions with filters - skip: {skip}, limit: {limit}, film_id: {film_id}, session_status: {session_status}")
+    logger.info(
+        f"Retrieving sessions with filters - skip: {skip}, limit: {limit}, film_id: {film_id}, session_status: {session_status}")
     query = db.query(SessionModel)
 
     if film_id is not None:

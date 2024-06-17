@@ -31,21 +31,30 @@ def create_payment(db: Session, payment_data: PaymentCreate, amount: int) -> Pay
     return db_payment
 
 
-def update_payment_status(db: Session, payment_id: str, new_status: PaymentStatus) -> Payment:
+from datetime import datetime, timedelta, timezone
+
+
+def update_payment_status(db: Session, payment_id: str, new_status: Optional[PaymentStatus] = None) -> Payment:
     """
-    Update the status of a payment.
+    Update the status of a payment. If no status is provided, set the status to FAILED if the payment timestamp was more than 10 minutes ago.
 
     Args:
         db (Session): The database session.
-        payment_id (int): The ID of the payment to update.
-        new_status (PaymentStatus): The new status to set.
+        payment_id (str): The ID of the payment to update.
+        new_status (PaymentStatus, optional): The new status to set. Defaults to None.
 
     Returns:
         Payment: The updated payment record.
     """
     db_payment = get_payment(db, payment_id)
-    db_payment.status = new_status
+    if new_status:
+        db_payment.status = new_status
+    else:
+        if db_payment.status is None and db_payment.timestamp < datetime.now(timezone.utc) - timedelta(minutes=10):
+            db_payment.status = PaymentStatus.FAILED
+
     db.commit()
+    db.refresh(db_payment)
     return db_payment
 
 

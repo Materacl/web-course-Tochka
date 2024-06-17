@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 # Initialize scheduler
 scheduler = BackgroundScheduler()
 
+
 @scheduler.scheduled_job('interval', seconds=15)
 def scheduled_update_session():
     """
@@ -28,6 +29,23 @@ def scheduled_update_session():
     finally:
         db.close()
 
+
+@scheduler.scheduled_job('interval', seconds=400)
+def scheduled_update_payments():
+    """
+    Scheduled job to update outdated payments every 400 seconds.
+    """
+    logger.info("Running scheduled session payments update job")
+    try:
+        db = next(get_db())
+        update_session(db)
+        logger.info("Scheduled payments update job completed successfully")
+    except Exception as e:
+        logger.error(f"Error in scheduled payments update job: {e}")
+    finally:
+        db.close()
+
+
 def set_main_admin_job():
     """
     One-time job to set the main admin.
@@ -41,6 +59,7 @@ def set_main_admin_job():
         logger.error(f"Error in one-time set main admin job: {e}")
     finally:
         db.close()
+
 
 # Schedule one-time job to run 1 minute from now
 one_time_run = datetime.now() + timedelta(minutes=1)
