@@ -116,6 +116,7 @@ class Booking(Base):
     session = relationship("Session", back_populates="bookings")
     user = relationship("User", back_populates="bookings")
     reservations = relationship("Reservation", back_populates="booking", cascade="all, delete-orphan")
+    payment = relationship("Payment", back_populates="booking")
 
     def __repr__(self):
         return f"<Booking(id={self.id}, session_id={self.session_id}, user_id={self.user_id})>"

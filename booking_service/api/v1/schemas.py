@@ -114,6 +114,7 @@ class Booking(BaseModel):
     user_id: int
     status: str
     reservations: List[Reservation]
+    payment: Optional[Payment]
 
     class Config:
         orm_mode = True
