@@ -29,9 +29,9 @@ router = APIRouter(
 )
 
 
-@router.post("/create-payment-intent", response_model=dict, status_code=status.HTTP_201_CREATED,
-             summary="Create a Stripe Payment Intent")
-async def create_payment_intent(
+@router.post("/create-checkout-session", response_model=dict, status_code=status.HTTP_201_CREATED,
+             summary="Create a Stripe Checkout Session")
+async def create_checkout_session(
         payment: PaymentCreate,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_active_user)
@@ -74,8 +74,8 @@ async def create_payment_intent(
                 'quantity': 1,
             }],
             mode='payment',
-            success_url=f"{os.getenv('FRONTEND_URL')}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{os.getenv('FRONTEND_URL')}/payment-cancel?session_id={{CHECKOUT_SESSION_ID}}",
+            success_url=f"{os.getenv('FRONTEND_URL')}/sessions/{db_booking.session_id}",
+            cancel_url=f"{os.getenv('FRONTEND_URL')}/sessions/{db_booking.session_id}",
             metadata={"booking_id": payment.booking_id}
         )
 

@@ -53,7 +53,7 @@
                     <p><strong>Status:</strong> {{ booking.status }}</p>
                 </div>
                 {% if booking.status == "confirmed" %}
-                <form action="{{ url_for('payment:pay_booking', booking_id=booking.id) }}" method="get">
+                <form action="{{ url_for('pay_booking', booking_id=booking.id) }}" method="get">
                     <button type="submit" class="btn btn-primary">Pay</button>
                 </form>
                 {% endif %}
