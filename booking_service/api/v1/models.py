@@ -116,7 +116,7 @@ class Booking(Base):
     session = relationship("Session", back_populates="bookings")
     user = relationship("User", back_populates="bookings")
     reservations = relationship("Reservation", back_populates="booking", cascade="all, delete-orphan")
-    payments = relationship("Payment", back_populates="booking")
+    payments = relationship("Payment", back_populates="booking", foreign_keys=[payment_id])
 
     def __repr__(self):
         return f"<Booking(id={self.id}, session_id={self.session_id}, user_id={self.user_id})>"
@@ -130,7 +130,6 @@ class Reservation(Base):
     seat_id = Column(Integer, ForeignKey("seats.id", ondelete="SET NULL"))
     status = Column(Enum(ReservationStatus), default=ReservationStatus.PENDING)
     deadline = Column(DateTime, default=datetime.now(timezone.utc))
-    booking = relationship("Booking", back_populates="reservations")
 
     def __repr__(self):
         return f"<Reservation(id={self.id}, booking_id={self.booking_id}, seat_id={self.seat_id})>"
@@ -143,7 +142,7 @@ class Payment(Base):
     amount = Column(Float, nullable=False)
     status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
     timestamp = Column(DateTime, default=datetime.now(timezone.utc))
-    booking = relationship("Booking", back_populates="payments")
+    booking = relationship("Booking", back_populates="payments", foreign_keys=[booking_id])
 
     def __repr__(self):
         return f"<Payment(id={self.id}, booking_id={self.booking_id}, amount={self.amount}, status={self.status})>"
