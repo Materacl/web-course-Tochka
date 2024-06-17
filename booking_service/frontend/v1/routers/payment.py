@@ -39,9 +39,9 @@ async def show_payment_page(request: Request, booking_id: int):
         headers = {"Authorization": token}
         async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
             response = await client.post(f"/payments/create-payment-intent", json={"booking_id": booking_id})
-            if response.status_code != status.HTTP_200_OK:
-                logger.error(f"Failed to fetch payment for booking_id: {booking_id}")
-                raise HTTPException(status_code=response.status_code, detail="Error fetching payment for booking")
+            if response.status_code != status.HTTP_201_CREATED:
+                logger.error(f"Failed to create payment for booking_id: {booking_id}")
+                raise HTTPException(status_code=response.status_code, detail="Error to create payment for booking")
             intent = response.json()
             if not intent:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
