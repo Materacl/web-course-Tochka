@@ -50,7 +50,7 @@ def update_payment_status(db: Session, payment_id: str, new_status: Optional[Pay
     if new_status:
         db_payment.status = new_status
     else:
-        if db_payment.status is None and db_payment.timestamp < datetime.now(timezone.utc) - timedelta(minutes=10):
+        if db_payment.status is PaymentStatus.PENDING and db_payment.timestamp < datetime.now(timezone.utc) - timedelta(minutes=10):
             db_payment.status = PaymentStatus.FAILED
 
     db.commit()
