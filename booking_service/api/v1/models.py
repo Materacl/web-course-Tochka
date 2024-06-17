@@ -30,6 +30,13 @@ class SeatStatus(str, PyEnum):
     RESERVED = "reserved"
     CANCELED = "canceled"
 
+class PaymentStatus(str, PyEnum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+
+
 # Define the User model
 class User(Base):
     __tablename__ = "users"
@@ -94,10 +101,12 @@ class Booking(Base):
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(Integer, ForeignKey("sessions.id", ondelete="CASCADE"))
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    payment_id = Column(Integer, ForeignKey("payments.id", ondelete="SET NULL"))
     status = Column(Enum(BookingStatus), default=BookingStatus.PENDING)
     session = relationship("Session", back_populates="bookings")
     user = relationship("User", back_populates="bookings")
     reservations = relationship("Reservation", back_populates="booking", cascade="all, delete-orphan")
+    payment = relationship("Payment", back_populates="booking", uselist=False)
 
     def __repr__(self):
         return f"<Booking(id={self.id}, session_id={self.session_id}, user_id={self.user_id})>"
@@ -115,3 +124,15 @@ class Reservation(Base):
     def __repr__(self):
         return f"<Reservation(id={self.id}, booking_id={self.booking_id}, seat_id={self.seat_id})>"
     
+
+class Payment(Base):
+    __tablename__ = "payments"
+    id = Column(Integer, primary_key=True, index=True)
+    booking_id = Column(Integer, ForeignKey("bookings.id", ondelete="CASCADE"))
+    amount = Column(Float, nullable=False)
+    status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
+    timestamp = Column(DateTime, default=datetime.now(timezone.utc))
+    booking = relationship("Booking", back_populates="payment")
+
+    def __repr__(self):
+        return f"<Payment(id={self.id}, booking_id={self.booking_id}, amount={self.amount}, status={self.status})>"

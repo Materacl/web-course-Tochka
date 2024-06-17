@@ -21,7 +21,7 @@
                     {% for session in film.sessions %}
                         <li class="{% if session.status == 'canceled' or session.status == 'completed' %}disabled{% endif %}">
                             <a href="{{ url_for('read_session', session_id=session.id) }}">
-                                <p>{{ session.datetime }} - {{ session.price }} - {{ session.reserved_seats}}/{{session.capacity}} - {{ session.status }}</p>
+                                <p>Date: {{ session.datetime }} - Price: {{ session.price }} - Seats Amount: {{ session.reserved_seats}}/{{session.capacity}} - {{ session.status }}</p>
                             </a>
                             {% if request.state.is_admin %}
                             <form action="{{ url_for('change_session_status', session_id=session.id, new_status='canceled') }}" method="post">

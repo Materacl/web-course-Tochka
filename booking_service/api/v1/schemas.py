@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
-from .models import FilmStatus, SeatStatus, ReservationStatus, SessionStatus
+from .models import FilmStatus, PaymentStatus, SeatStatus, ReservationStatus, SessionStatus
 
 
 class UserCreate(BaseModel):
@@ -76,6 +76,26 @@ class Reservation(BaseModel):
     class Config:
         orm_mode = True
 
+class PaymentCreate(BaseModel):
+    """
+    Schema for creating a new payment.
+    """
+    booking_id: int
+    amount: float
+    status: Optional[PaymentStatus] = PaymentStatus.PENDING
+
+class Payment(BaseModel):
+    """
+    Schema for representing a payment.
+    """
+    id: int
+    booking_id: int
+    amount: float
+    status: PaymentStatus
+    timestamp: datetime
+
+    class Config:
+        orm_mode = True
 
 class BookingCreate(BaseModel):
     """
@@ -93,6 +113,7 @@ class Booking(BaseModel):
     user_id: int
     status: str
     reservations: List[Reservation]
+    payment: Optional[Payment]
 
     class Config:
         orm_mode = True
