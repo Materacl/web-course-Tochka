@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .routers import home, films, bookings, auth, sessions, profile
+from .routers import home, films, bookings, auth, sessions, profile, payment
 
 # Initialize the main router
 router = APIRouter()
@@ -12,3 +12,4 @@ router.include_router(profile.router)
 router.include_router(films.router)
 router.include_router(sessions.router)
 router.include_router(bookings.router)
+router.include_router(payment.router)
