@@ -21,6 +21,7 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory="v1/templates")
 
+
 @router.get("/{booking_id}/pay", response_class=HTMLResponse, summary="Show payment page")
 async def show_payment_page(request: Request, booking_id: int):
     """
@@ -37,22 +38,22 @@ async def show_payment_page(request: Request, booking_id: int):
         token = request.cookies.get("access_token")
         headers = {"Authorization": token}
         async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
-            response = await client.get(f"/bookings/{booking_id}")
+            response = await client.post(f"/payments", json={"booking_id": booking_id})
             if response.status_code != status.HTTP_200_OK:
                 logger.error(f"Failed to fetch payment for booking_id: {booking_id}")
-                raise HTTPException(status_code=response.status_code, detail="Error adding session")
-            db_payment = response.json()
-            if not db_payment:
+                raise HTTPException(status_code=response.status_code, detail="Error fetching payment for booking")
+            intent = response.json()
+            if not intent:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
-            response = await client.post
-        intent = stripe.PaymentIntent.create(
-            amount=int(db_payment.amount * 100),
-            currency="usd",
-            metadata={"payment_id": db_payment.id},
-        )
 
         client_secret = intent['client_secret']
-        return templates.TemplateResponse("payment.html", {"request": request, "client_secret": client_secret, "booking": db_payment.booking})
+        response = await client.get(f"/bookings/{booking_id}")
+        if response.status_code != status.HTTP_200_OK:
+            logger.error("Failed to fetch booking details for booking_id: %s", booking_id)
+            HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Error fetching booking for this payment")
+        db_booking = response.json()
+        return templates.TemplateResponse("payment.html", {"request": request, "client_secret": client_secret,
+                                                           "booking": db_booking})
     except Exception as e:
         logger.error(f"Error showing payment page: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error showing payment page")

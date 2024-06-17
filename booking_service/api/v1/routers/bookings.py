@@ -21,11 +21,13 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.post("/", response_model=Booking, status_code=status.HTTP_201_CREATED, summary="Create a new booking", tags=["bookings"])
+
+@router.post("/", response_model=Booking, status_code=status.HTTP_201_CREATED, summary="Create a new booking",
+             tags=["bookings"])
 async def create_new_booking(
-    booking: BookingCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+        booking: BookingCreate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_active_user)
 ) -> Booking:
     """
     Create a new booking.
@@ -43,11 +45,13 @@ async def create_new_booking(
     logger.info(f"Booking created with ID: {db_booking.id}")
     return db_booking
 
-@router.delete("/{booking_id}/delete", response_model=Booking, status_code=status.HTTP_200_OK, summary="Delete a booking", tags=["bookings"])
+
+@router.delete("/{booking_id}/delete", response_model=Booking, status_code=status.HTTP_200_OK,
+               summary="Delete a booking", tags=["bookings"])
 async def delete_booking_from_db(
-    booking_id: int,
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_active_admin)
+        booking_id: int,
+        db: Session = Depends(get_db),
+        current_admin: User = Depends(get_current_active_admin)
 ) -> Booking:
     """
     Delete a booking by ID.
@@ -65,12 +69,14 @@ async def delete_booking_from_db(
     logger.info(f"Booking with ID: {booking_id} deleted")
     return db_booking
 
-@router.post("/{booking_id}/{new_status}", response_model=Booking, status_code=status.HTTP_200_OK, summary="Set booking status", tags=["bookings"])
+
+@router.post("/{booking_id}/{new_status}", response_model=Booking, status_code=status.HTTP_200_OK,
+             summary="Set booking status", tags=["bookings"])
 async def set_booking_status(
-    booking_id: int,
-    new_status: BookingStatus,
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_active_admin)
+        booking_id: int,
+        new_status: BookingStatus,
+        db: Session = Depends(get_db),
+        current_admin: User = Depends(get_current_active_admin)
 ) -> Booking:
     """
     Set the status of a booking.
@@ -100,11 +106,13 @@ async def set_booking_status(
     logger.info(f"Booking ID {booking_id} status updated to {new_status}")
     return db_booking
 
-@router.post("/{booking_id}/cancel", response_model=Booking, status_code=status.HTTP_200_OK, summary="Cancel user booking", tags=["bookings"])
+
+@router.post("/{booking_id}/cancel", response_model=Booking, status_code=status.HTTP_200_OK,
+             summary="Cancel user booking", tags=["bookings"])
 async def cancel_user_booking(
-    booking_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+        booking_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_active_user)
 ) -> Booking:
     """
     Cancel a user booking.
@@ -137,7 +145,9 @@ async def cancel_user_booking(
     logger.info(f"Booking with ID {booking_id} cancelled")
     return db_booking
 
-@router.get("/{booking_id}", response_model=Booking, status_code=status.HTTP_200_OK, summary="Read a booking", tags=["bookings"])
+
+@router.get("/{booking_id}", response_model=Booking, status_code=status.HTTP_200_OK, summary="Read a booking",
+            tags=["bookings"])
 async def read_booking(booking_id: int, db: Session = Depends(get_db)) -> Booking:
     """
     Read a booking by ID.
@@ -152,14 +162,16 @@ async def read_booking(booking_id: int, db: Session = Depends(get_db)) -> Bookin
     logger.info(f"Fetching booking details for booking ID {booking_id}")
     return get_booking(db, booking_id)
 
-@router.get("/", response_model=List[Booking], status_code=status.HTTP_200_OK, summary="Read multiple bookings", tags=["bookings"])
+
+@router.get("/", response_model=List[Booking], status_code=status.HTTP_200_OK, summary="Read multiple bookings",
+            tags=["bookings"])
 async def read_bookings(
-    skip: Optional[int] = None,
-    limit: Optional[int] = None,
-    user_id: Optional[int] = None,
-    session_id: Optional[int] = None,
-    booking_status: Optional[BookingStatus] = None,
-    db: Session = Depends(get_db)
+        skip: Optional[int] = None,
+        limit: Optional[int] = None,
+        user_id: Optional[int] = None,
+        session_id: Optional[int] = None,
+        booking_status: Optional[BookingStatus] = None,
+        db: Session = Depends(get_db)
 ) -> List[Booking]:
     """
     Read multiple bookings with optional filters.

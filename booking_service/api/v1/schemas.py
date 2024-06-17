@@ -76,13 +76,13 @@ class Reservation(BaseModel):
     class Config:
         orm_mode = True
 
+
 class PaymentCreate(BaseModel):
     """
     Schema for creating a new payment.
     """
     booking_id: int
-    amount: float
-    status: Optional[PaymentStatus] = PaymentStatus.PENDING
+
 
 class Payment(BaseModel):
     """
@@ -96,6 +96,7 @@ class Payment(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class BookingCreate(BaseModel):
     """
@@ -179,4 +180,3 @@ class AdminAction(BaseModel):
     Schema for representing an admin action.
     """
     status: str
-    

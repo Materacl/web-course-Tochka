@@ -4,10 +4,12 @@ from datetime import datetime, timezone
 from .database import Base
 from enum import Enum as PyEnum
 
+
 # Define enum classes for various statuses
 class FilmStatus(str, PyEnum):
     AVAILABLE = "available"
     NOT_AVAILABLE = "not_available"
+
 
 class SessionStatus(str, PyEnum):
     UPCOMING = "upcoming"
@@ -15,20 +17,24 @@ class SessionStatus(str, PyEnum):
     COMPLETED = "completed"
     CANCELED = "canceled"
 
+
 class BookingStatus(str, PyEnum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
     CANCELED = "canceled"
+
 
 class ReservationStatus(str, PyEnum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
     CANCELED = "canceled"
 
+
 class SeatStatus(str, PyEnum):
     AVAILABLE = "available"
     RESERVED = "reserved"
     CANCELED = "canceled"
+
 
 class PaymentStatus(str, PyEnum):
     PENDING = "pending"
@@ -52,6 +58,7 @@ class User(Base):
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, nickname={self.nickname})>"
 
+
 # Define the Film model
 class Film(Base):
     __tablename__ = "films"
@@ -65,6 +72,7 @@ class Film(Base):
 
     def __repr__(self):
         return f"<Film(id={self.id}, title={self.title}, status={self.status})>"
+
 
 # Define the Session model
 class Session(Base):
@@ -83,6 +91,7 @@ class Session(Base):
     def __repr__(self):
         return f"<Session(id={self.id}, film_id={self.film_id}, datetime={self.datetime})>"
 
+
 # Define the Seat model
 class Seat(Base):
     __tablename__ = "seats"
@@ -94,6 +103,7 @@ class Seat(Base):
 
     def __repr__(self):
         return f"<Seat(id={self.id}, session_id={self.session_id}, status={self.status})>"
+
 
 # Define the Booking model
 class Booking(Base):
@@ -111,6 +121,7 @@ class Booking(Base):
     def __repr__(self):
         return f"<Booking(id={self.id}, session_id={self.session_id}, user_id={self.user_id})>"
 
+
 # Define the Reservation model
 class Reservation(Base):
     __tablename__ = "reservations"
@@ -123,7 +134,7 @@ class Reservation(Base):
 
     def __repr__(self):
         return f"<Reservation(id={self.id}, booking_id={self.booking_id}, seat_id={self.seat_id})>"
-    
+
 
 class Payment(Base):
     __tablename__ = "payments"

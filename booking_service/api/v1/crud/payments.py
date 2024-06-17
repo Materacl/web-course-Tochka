@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from ..models import Payment, PaymentStatus
 from ..schemas import PaymentCreate
 
+
 def create_payment(db: Session, payment_data: PaymentCreate) -> Payment:
     """
     Create a new payment record in the database.
@@ -23,6 +24,7 @@ def create_payment(db: Session, payment_data: PaymentCreate) -> Payment:
     db.refresh(db_payment)
     return db_payment
 
+
 def update_payment_status(db: Session, payment_id: int, new_status: PaymentStatus) -> Payment:
     """
     Update the status of a payment.
@@ -40,6 +42,7 @@ def update_payment_status(db: Session, payment_id: int, new_status: PaymentStatu
     db.commit()
     return db_payment
     return None
+
 
 def get_payment(db: Session, payment_id: int) -> Payment:
     """

@@ -18,11 +18,12 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory="frontend/templates")
 
+
 @router.post("/", response_class=RedirectResponse, summary="Create a new booking", tags=["bookings"])
 async def create_booking(
-    request: Request,
-    session_id: int = Form(...),
-    seat_ids: str = Form(...),
+        request: Request,
+        session_id: int = Form(...),
+        seat_ids: str = Form(...),
 ):
     """
     Create a new booking.
@@ -65,6 +66,7 @@ async def create_booking(
     logger.info("Successfully created booking for session_id: %s by user: %s", session_id, request.state.email)
     return RedirectResponse(url=f"/sessions/{session_id}", status_code=status.HTTP_303_SEE_OTHER)
 
+
 @router.get("/{booking_id}", response_class=HTMLResponse, summary="Get booking details", tags=["bookings"])
 async def read_booking(request: Request, booking_id: int):
     """
@@ -94,6 +96,7 @@ async def read_booking(request: Request, booking_id: int):
         "request": request,
         "booking": booking
     })
+
 
 @router.post("/{booking_id}/{new_status}", summary="Change booking status", tags=["bookings"])
 async def change_booking_status(request: Request, booking_id: int, new_status: str):
@@ -132,7 +135,8 @@ async def change_booking_status(request: Request, booking_id: int, new_status: s
                 raise HTTPException(status_code=response.status_code, detail="Error getting booking")
             if response.json()["user_id"] != request.state.user_id:
                 logger.warning("Unauthorized cancellation attempt for booking_id: %s", booking_id)
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                    detail="Not authorized to perform this action")
 
             response = await client.post(f"/bookings/{booking_id}")
             if response.status_code != status.HTTP_200_OK:
