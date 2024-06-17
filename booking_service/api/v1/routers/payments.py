@@ -55,7 +55,7 @@ async def create_payment_intent(
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                     detail="Payment with this booking_id already exist.")
         db_session = get_session(db, db_booking.session_id)
-        if db_session:
+        if not db_session:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="Session for this payment is not found.")
         amount = int(db_session.price * len(db_booking.reservations) * 100)

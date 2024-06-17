@@ -38,7 +38,7 @@ async def show_payment_page(request: Request, booking_id: int):
         token = request.cookies.get("access_token")
         headers = {"Authorization": token}
         async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
-            response = await client.post(f"/payments", json={"booking_id": booking_id})
+            response = await client.post(f"/payments/create-payment-intent", json={"booking_id": booking_id})
             if response.status_code != status.HTTP_200_OK:
                 logger.error(f"Failed to fetch payment for booking_id: {booking_id}")
                 raise HTTPException(status_code=response.status_code, detail="Error fetching payment for booking")
