@@ -190,6 +190,12 @@ def format_session(session):
     Returns:
         dict: The formatted session data.
     """
+    for booking in session.get("bookings", []):
+        for payment in booking.get("payments", []):
+            if payment["status"] == "completed":
+                booking["completed_payment"] = payment
+        if not booking.get("completed_payment", None):
+            booking["completed_payment"] = None
     dt_object = datetime.fromisoformat(session["datetime"])
     session["datetime"] = dt_object.strftime("%B %d, %Y %H:%M:%S")
     session["reserved_seats"] = len([seat for seat in session["seats"] if seat["status"] == "reserved"])

@@ -51,12 +51,19 @@
                         {% endfor %}
                     </p>
                     <p><strong>Status:</strong> {{ booking.status }}</p>
+                    <p>
+                        <strong>Paid:</strong>
+                        {% if booking.completed_payment%}
+                            True
+                        {% else %}
+                            False
+                        {% endif %}
+                    </p>
                 </div>
-                {% if booking.status == "confirmed" %}
+                {% if booking.status == "confirmed" and not booking.completed_payment%}
                 <form action="{{ url_for('pay_booking', booking_id=booking.id) }}" method="get">
                     <button type="submit" class="btn btn-primary">Pay</button>
                 </form>
-                <p>{{ booking.payments}}</p>
                 {% endif %}
                 {% if booking.status == "canceled" %}
                 {% else %}
