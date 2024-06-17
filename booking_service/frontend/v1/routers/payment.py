@@ -36,7 +36,7 @@ async def pay_booking(request: Request, booking_id: int):
         token = request.cookies.get("access_token")
         headers = {"Authorization": token}
         async with httpx.AsyncClient(base_url=settings.API_URL, headers=headers) as client:
-            response = await client.post("/payments/create-checkout-session", json={"id": temp, "booking_id": booking_id})
+            response = await client.post("/payments/create-checkout-session", json={"id": "temp", "booking_id": booking_id})
             if response.status_code != status.HTTP_201_CREATED:
                 logger.error(f"Error creating Checkout Session: {response.text}")
                 raise HTTPException(status_code=response.status_code, detail="Error creating Checkout Session")
