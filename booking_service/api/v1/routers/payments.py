@@ -11,7 +11,7 @@ from ..database import get_db
 from ..schemas import PaymentCreate, Payment
 from ..utils.auth import get_current_active_user
 from ..schemas import User
-from ..crud.payments import create_payment, update_payment_status, get_payment
+from ..crud.payments import create_payment, update_payment_status, get_payment, get_payments
 from ..crud.bookings import get_booking
 from ..crud.sessions import get_session
 
@@ -49,11 +49,11 @@ async def create_checkout_session(
     """
     try:
         db_booking = get_booking(db, payment.booking_id)
-        if db_booking.payment_id:
-            current_payment = get_payment(db, db_booking.payment_id)
-            if current_payment.status != PaymentStatus.FAILED:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                    detail="Payment with this booking_id already exist.")
+        if db_booking.payments:
+            for current_payment in db_booking.payments:
+                if current_payment.status in [PaymentStatus.PENDING, PaymentStatus.COMPLETED]:
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                        detail="Payment with this booking_id already exist.")
         db_session = get_session(db, db_booking.session_id)
         if not db_session:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

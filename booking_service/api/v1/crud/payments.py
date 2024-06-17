@@ -1,6 +1,11 @@
+import logging
+from typing import Optional, List
+
 from sqlalchemy.orm import Session
 from ..models import Payment, PaymentStatus
 from ..schemas import PaymentCreate
+
+logger = logging.getLogger(__name__)
 
 
 def create_payment(db: Session, payment_data: PaymentCreate, amount: int) -> Payment:
@@ -62,3 +67,35 @@ def get_payment(db: Session, payment_id: str) -> Payment:
     if db_payment is None:
         raise Exception("Payment not found")
     return db_payment
+
+
+def get_payments(db: Session, skip: Optional[int] = None, limit: Optional[int] = None,
+                 booking_id: Optional[int] = None) -> List[Payment]:
+    """
+    Retrieve a list of payments with optional filters.
+
+    Args:
+        db (Session): The database session.
+        skip (Optional[int]): Number of records to skip.
+        limit (Optional[int]): Maximum number of records to return.
+        payment_id (int): The ID of the payment to retrieve.
+
+    Returns:
+        List[Payment]: A list of payments.
+    """
+    logger.info(
+        f"Retrieving payments with filters - skip: {skip}, limit: {limit}, booking_id: {booking_id}")
+    query = db.query(Payment)
+
+    if booking_id is not None:
+        query = query.filter(Payment.booking_id == booking_id)
+
+    if skip is not None:
+        query = query.offset(skip)
+
+    if limit is not None:
+        query = query.limit(limit)
+
+    payments = query.all()
+    logger.info(f"Retrieved {len(payments)} payments")
+    return payments
