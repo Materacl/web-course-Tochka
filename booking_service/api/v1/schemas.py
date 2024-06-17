@@ -81,6 +81,7 @@ class PaymentCreate(BaseModel):
     """
     Schema for creating a new payment.
     """
+    id: str
     booking_id: int
 
 
@@ -114,7 +115,7 @@ class Booking(BaseModel):
     user_id: int
     status: str
     reservations: List[Reservation]
-    payment: Optional[Payment]
+    payments: Optional[List[Payment]]
 
     class Config:
         orm_mode = True

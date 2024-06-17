@@ -15,6 +15,7 @@ def create_payment(db: Session, payment_data: PaymentCreate, amount: int) -> Pay
         Payment: The created payment record.
     """
     db_payment = Payment(
+        id=payment_data.id,
         booking_id=payment_data.booking_id,
         amount=amount,
         status=PaymentStatus.PENDING
@@ -25,7 +26,7 @@ def create_payment(db: Session, payment_data: PaymentCreate, amount: int) -> Pay
     return db_payment
 
 
-def update_payment_status(db: Session, payment_id: int, new_status: PaymentStatus) -> Payment:
+def update_payment_status(db: Session, payment_id: str, new_status: PaymentStatus) -> Payment:
     """
     Update the status of a payment.
 
@@ -41,10 +42,9 @@ def update_payment_status(db: Session, payment_id: int, new_status: PaymentStatu
     db_payment.status = new_status
     db.commit()
     return db_payment
-    return None
 
 
-def get_payment(db: Session, payment_id: int) -> Payment:
+def get_payment(db: Session, payment_id: str) -> Payment:
     """
     Retrieve a payment record by ID.
 

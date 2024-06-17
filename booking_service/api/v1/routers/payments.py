@@ -80,6 +80,7 @@ async def create_checkout_session(
         )
 
         # Save the Payment information in the database
+        payment.id = session["id"]
         db_payment = create_payment(db, payment, amount)
         logger.info(f"Checkout Session created: {session['id']} for Booking ID: {db_payment.booking_id}")
 
@@ -122,8 +123,7 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         logger.info(f"Checkout Session was successful: {session['id']}")
 
         # Update payment status in the database
-        booking_id = session["metadata"]["booking_id"]
-        payment_id = get_booking(db, booking_id).payment_id
+        payment_id = session["id"]
         if payment_id:
             db_payment = update_payment_status(db, payment_id, PaymentStatus.COMPLETED)
             if db_payment:
